@@ -1,3 +1,2 @@
 mkdir /var/www/sheaker.com/sheaker-api
-echo $HOME
 put -rp ~/clone/* /var/www/sheaker.com/sheaker-api
