@@ -1,2 +1,2 @@
-mkdir /var/www/sheaker.com/sheaker-gym
-put -rp "${HOME}/clone/*" /var/www/sheaker.com/sheaker-gym
+mkdir /var/www/sheaker.com/sheaker-api
+put -rp "${HOME}/clone/*" /var/www/sheaker.com/sheaker-api
