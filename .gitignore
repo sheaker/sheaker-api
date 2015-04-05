@@ -1,0 +1,6 @@
+/vendor
+/logs/*.log
+/config/*.php
+/public/photos/*
+composer.lock
+.DS_Store

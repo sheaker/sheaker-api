@@ -1,0 +1,14 @@
+<?php
+
+/**
+ * Database Connection
+ */
+$app['database.dbname'] = 'sheaker_gym';
+$app['database.host']   = '127.0.0.1';
+$app['database.user']   = 'root';
+$app['database.passwd'] = '';
+
+/**
+ * Sheaker API
+ */
+$app['sheaker.api'] = 'http://sheaker.com/api';
