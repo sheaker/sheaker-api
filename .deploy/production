@@ -1,2 +1,2 @@
-mkdir /var/www/sheaker.com/sheaker-api
-put -rp ~/clone/* /var/www/sheaker.com/sheaker-api
+lpwd
+put -rp * /var/www/sheaker.com/sheaker-api
