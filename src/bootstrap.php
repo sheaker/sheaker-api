@@ -36,10 +36,11 @@ $app['api.accessLevels'] = [
 /**
  * Register service providers
  */
+$idClient = isset($_GET['id_client']) ? $_GET['id_client'] : 0;
 $app->register(new DoctrineServiceProvider(), [
     'dbs.options' => [
         'gym' => [
-            'dbname'   => 'client_gym4devs',// . explode('.', $_SERVER['HTTP_HOST'])[0],
+            'dbname'   => 'client_' . $idClient,
             'host'     => $app['database.host'],
             'user'     => $app['database.user'],
             'password' => $app['database.passwd']
