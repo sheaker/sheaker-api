@@ -63,7 +63,7 @@ class MainController
             $user->setFailedLogins(0);
             $app['repository.user']->save($user);
 
-            $exp = ($loginParams['rememberMe']) ? time() + 60 * 60 * 24 * 360 : time() + 60 * 60 * 24; // expire in 1year or 24h
+            $exp = ($loginParams['rememberMe']) ? time() + 60 * 60 * 24 * 30 : time() + 60 * 60 * 24; // expire in 30 days or 24h
             $userToken = [
                 'number'      => ($user->getCustomId()) ? $user->getCustomId() : $user->getId(),
                 'name'        => $user->getFirstName(),
@@ -99,7 +99,7 @@ class MainController
 
         $oldToken = \JWT::decode($renewParams['oldToken'], $app['client']->getClient()->secretKey, false);
 
-        $exp = ($oldToken->user->rememberMe) ? time() + 60 * 60 * 24 * 360 : time() + 60 * 60 * 24; // expire in 1year or 24h
+        $exp = ($oldToken->user->rememberMe) ? time() + 60 * 60 * 24 * 30 : time() + 60 * 60 * 24; // expire in 30 days or 24h
         $newToken = $app['jwt']->createToken($request, $exp, $oldToken->user);
 
         return json_encode(['token' => $newToken], JSON_NUMERIC_CHECK);

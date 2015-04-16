@@ -2,8 +2,8 @@
 
 $clientId = 1;
 
-$dbh_sheaker = new PDO('mysql:host=localhost;dbname=client_gym4devs', 'root', '');
-$dbh_forcegym = new PDO('mysql:host=localhost;dbname=forcegym', 'root', '');
+$dbh_sheaker = new PDO('mysql:host=localhost;dbname=client_1', 'root', '');
+$dbh_forcegym = new PDO('mysql:host=localhost;dbname=forcegym_saveusers', 'root', '');
 
 $fgMembers = $dbh_forcegym->query('SELECT * FROM miembros', PDO::FETCH_ASSOC);
 foreach($fgMembers as $fgMember) {
@@ -86,7 +86,7 @@ foreach($fgMembers as $fgMember) {
     echo ", his membership too";
 
     $originalPhoto = "photo/{$newMember['custom_id']}.jpg";
-    $prefixNewPhoto = '../api/public/';
+    $prefixNewPhoto = '../public/';
 
     if (!copy($originalPhoto, $prefixNewPhoto.$newMember['photo'])) {
         echo "ERROR: while copying photo\n";
