@@ -83,7 +83,7 @@ class UserRepository implements RepositoryInterface
                 SELECT id
                 FROM users_payments
                 WHERE user_id = u.id
-                AND NOW() BETWEEN start_date AND end_date
+                AND NOW() BETWEEN start_date AND end_date LIMIT 1
             ) AS active_membership_id
             FROM users u
             LEFT JOIN users_access ua ON ua.user_id = u.id
@@ -105,7 +105,7 @@ class UserRepository implements RepositoryInterface
                 SELECT id
                 FROM users_payments
                 WHERE user_id = u.id
-                AND NOW() BETWEEN start_date AND end_date
+                AND NOW() BETWEEN start_date AND end_date LIMIT 1
             ) AS active_membership_id
             FROM users u
             LEFT JOIN users_access ua ON ua.user_id = u.id
@@ -163,7 +163,7 @@ class UserRepository implements RepositoryInterface
             ->addSelect('(SELECT id
                 FROM users_payments
                 WHERE user_id = u.id
-                AND NOW() BETWEEN start_date AND end_date
+                AND NOW() BETWEEN start_date AND end_date LIMIT 1
                 ) AS active_membership_id
             ')
             ->from('users', 'u')
