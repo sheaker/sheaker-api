@@ -29,7 +29,7 @@ class UserController
             $user->setPayments($app['repository.payment']->find($user->activeMembershipId));
         }
 
-        return json_encode(array_values($users), JSON_NUMERIC_CHECK);
+        return json_encode(array_values($users), JSON_NUMERIC_CHECK, 5000);
     }
 
     public function getUser(Request $request, Application $app)
@@ -59,7 +59,7 @@ class UserController
 
         $user->setPayments($app['repository.payment']->findAll(0, 0, array(), array('user_id' => $user->id)));
 
-        return json_encode($user, JSON_NUMERIC_CHECK);
+        return json_encode($user, JSON_NUMERIC_CHECK, 5000);
     }
 
     public function addUser(Request $request, Application $app)
@@ -130,7 +130,7 @@ class UserController
         $user->setPhoto($photoPath);
         $app['repository.user']->save($user);
 
-        return json_encode($user, JSON_NUMERIC_CHECK);
+        return json_encode($user, JSON_NUMERIC_CHECK, 5000);
     }
 
     public function editUser(Request $request, Application $app)
@@ -203,6 +203,6 @@ class UserController
         $user->setPhoto($photoPath);
         $app['repository.user']->save($user);
 
-        return json_encode($user, JSON_NUMERIC_CHECK);
+        return json_encode($user, JSON_NUMERIC_CHECK, 5000);
     }
 }

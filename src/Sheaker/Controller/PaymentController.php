@@ -31,7 +31,7 @@ class PaymentController
             $users = $app['repository.payment']->findAll($getParams['limit'], $getParams['offset'], array($getParams['sortBy'] => $getParams['order']));
         }
 
-        return json_encode(array_values($users), JSON_NUMERIC_CHECK);
+        return json_encode(array_values($users), JSON_NUMERIC_CHECK, 5000);
     }
 
     public function getPayment(Request $request, Application $app)
@@ -56,7 +56,7 @@ class PaymentController
             $app->abort(Response::HTTP_NOT_FOUND, 'Payment not found');
         }
 
-        return json_encode($payment, JSON_NUMERIC_CHECK);
+        return json_encode($payment, JSON_NUMERIC_CHECK, 5000);
     }
 
     public function addPayment(Request $request, Application $app)
@@ -98,6 +98,6 @@ class PaymentController
 
         $user->setPayments($app['repository.payment']->findAll(0, 0, array(), array('user_id' => $user->id)));
 
-        return json_encode($payment, JSON_NUMERIC_CHECK);
+        return json_encode($payment, JSON_NUMERIC_CHECK, 5000);
     }
 }
