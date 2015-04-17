@@ -25,7 +25,7 @@ class PaymentController
         $getParams['order']  = $app->escape($request->get('order',  'DESC'));
 
         if ($getParams['user']) {
-            $users = $app['repository.payment']->findAllByUser($getParams['user'], $getParams['limit'], $getParams['offset'], array($getParams['sortBy'] => $getParams['order']));
+            $users = $app['repository.payment']->findAll($getParams['limit'], $getParams['offset'], array($getParams['sortBy'] => $getParams['order']), array('user_id' => $getParams['user']));
         }
         else {
             $users = $app['repository.payment']->findAll($getParams['limit'], $getParams['offset'], array($getParams['sortBy'] => $getParams['order']));

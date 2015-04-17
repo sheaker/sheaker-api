@@ -26,7 +26,7 @@ class CheckinController
         $getParams['order']  = $app->escape($request->get('order',  'DESC'));
 
         if ($getParams['user']) {
-            $checkin = $app['repository.checkin']->findAllByUser($getParams['user'], $getParams['limit'], $getParams['offset'], array($getParams['sortBy'] => $getParams['order']));
+            $checkin = $app['repository.checkin']->findAll($getParams['limit'], $getParams['offset'], array($getParams['sortBy'] => $getParams['order']), array('user_id' => $getParams['user']));
         }
         else {
             $checkin = $app['repository.checkin']->findAll($getParams['limit'], $getParams['offset'], array($getParams['sortBy'] => $getParams['order']));

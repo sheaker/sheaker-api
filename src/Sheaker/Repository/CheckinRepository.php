@@ -62,40 +62,9 @@ class CheckinRepository implements RepositoryInterface
      *
      * @return array A collection of checkin, keyed by ckeckin id.
      */
-    public function findAll($limit = 0, $offset = 0, $orderBy = array())
+    public function findAll($limit = 0, $offset = 0, $orderBy = array(), $conditions = array())
     {
-        return $this->getCheckin(array(), $limit, $offset, $orderBy);
-    }
-
-    /**
-     * Returns a collection of checkin for a user.
-     *
-     * @param integer $userId
-     *   The user Id
-     * @param integer $limit
-     *   The number of checkin to return.
-     * @param integer $offset
-     *   The number of checkin to skip.
-     * @param array $orderBy
-     *   Optionally, the order by info, in the $column => $direction format.
-     *
-     * @return array A collection of checkin, keyed by checkin id.
-     */
-    public function findAllByUser($userId, $limit = 0, $offset = 0, $orderBy = array())
-    {
-        $conditions = array(
-            'user_id' => $userId
-        );
-
         return $this->getCheckin($conditions, $limit, $offset, $orderBy);
-    }
-
-    public function delete($id)
-    {
-    }
-
-    public function getCount()
-    {
     }
 
     /**

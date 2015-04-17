@@ -74,40 +74,9 @@ class PaymentRepository implements RepositoryInterface
      *
      * @return array A collection of payments, keyed by payment id.
      */
-    public function findAll($limit = 0, $offset = 0, $orderBy = array())
+    public function findAll($limit = 0, $offset = 0, $orderBy = array(), $conditions = array())
     {
-        return $this->getPayments(array(), $limit, $offset, $orderBy);
-    }
-
-    /**
-     * Returns a collection of payments.
-     *
-     * @param integer $userId
-     *   The user Id
-     * @param integer $limit
-     *   The number of payments to return.
-     * @param integer $offset
-     *   The number of payments to skip.
-     * @param array $orderBy
-     *   Optionally, the order by info, in the $column => $direction format.
-     *
-     * @return array A collection of payments, keyed by payment id.
-     */
-    public function findAllByUser($userId, $limit = 0, $offset = 0, $orderBy = array())
-    {
-        $conditions = array(
-            'user_id' => $userId
-        );
-
         return $this->getPayments($conditions, $limit, $offset, $orderBy);
-    }
-
-    public function delete($id)
-    {
-    }
-
-    public function getCount()
-    {
     }
 
     /**
