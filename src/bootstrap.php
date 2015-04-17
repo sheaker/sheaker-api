@@ -43,13 +43,17 @@ $app->register(new DoctrineServiceProvider(), [
             'dbname'   => 'client_' . $idClient,
             'host'     => $app['database.host'],
             'user'     => $app['database.user'],
-            'password' => $app['database.passwd']
+            'password' => $app['database.passwd'],
+            'charset'  => 'utf8',
+            'driverOptions' => array(1002 => 'SET NAMES utf8')
         ],
         'sheaker' => [
             'dbname'   => 'sheaker',
             'host'     => $app['database.host'],
             'user'     => $app['database.user'],
-            'password' => $app['database.passwd']
+            'password' => $app['database.passwd'],
+            'charset'  => 'utf8',
+            'driverOptions' => array(1002 => 'SET NAMES utf8')
         ]
     ]
 ]);
