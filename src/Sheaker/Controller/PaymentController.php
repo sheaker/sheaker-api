@@ -25,7 +25,7 @@ class PaymentController
         $getParams['order']  = $app->escape($request->get('order',  'DESC'));
 
         if ($getParams['user']) {
-            $users = $app['repository.payment']->findAllByUser($getParams['user'], $getParams['limit'], $getParams['offset'], array($getParams['sortBy'] => $getParams['order']));
+            $users = $app['repository.payment']->findAll($getParams['limit'], $getParams['offset'], array($getParams['sortBy'] => $getParams['order']), array('user_id' => $getParams['user']));
         }
         else {
             $users = $app['repository.payment']->findAll($getParams['limit'], $getParams['offset'], array($getParams['sortBy'] => $getParams['order']));
@@ -95,6 +95,8 @@ class PaymentController
         $payment->setMethod($addParams['method']);
         $payment->setPaymentDate(date('c'));
         $app['repository.payment']->save($payment);
+
+        $user->setPayments($app['repository.payment']->findAll(0, 0, array(), array('user_id' => $user->id)));
 
         return json_encode($payment, JSON_NUMERIC_CHECK);
     }

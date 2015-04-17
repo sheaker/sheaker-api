@@ -86,17 +86,9 @@ class ClientRepository implements RepositoryInterface
      *
      * @return array A collection of clients, keyed by client id.
      */
-    public function findAll($limit = 0, $offset = 0, $orderBy = array())
+    public function findAll($limit = 0, $offset = 0, $orderBy = array(), $conditions = array())
     {
-        return $this->getClients(array(), $limit, $offset, $orderBy);
-    }
-
-    public function delete($id)
-    {
-    }
-
-    public function getCount()
-    {
+        return $this->getClients($conditions, $limit, $offset, $orderBy);
     }
 
     /**

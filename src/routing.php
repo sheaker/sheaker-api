@@ -22,3 +22,10 @@ $app->put('/users/{id}', 'Sheaker\Controller\UserController::editUser');
 $app->get('/payments',      'Sheaker\Controller\PaymentController::getPaymentsList');
 $app->get('/payments/{id}', 'Sheaker\Controller\PaymentController::getPayment');
 $app->post('/payments',     'Sheaker\Controller\PaymentController::addPayment');
+
+/**
+ * Checkin routes
+ */
+$app->get('/checkin',      'Sheaker\Controller\CheckinController::getCheckinList');
+$app->get('/checkin/{id}', 'Sheaker\Controller\CheckinController::getCheckin');
+$app->post('/checkin',     'Sheaker\Controller\CheckinController::addCheckin');

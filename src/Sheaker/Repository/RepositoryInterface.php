@@ -21,20 +21,6 @@ interface RepositoryInterface
     public function save($entity);
 
     /**
-     * Deletes the entity.
-     *
-     * @param integer $id
-     */
-    public function delete($id);
-
-    /**
-     * Returns the total number of entities.
-     *
-     * @return int The total number of entities.
-     */
-    public function getCount();
-
-    /**
      * Returns an entity matching the supplied id.
      *
      * @param integer $id
@@ -52,8 +38,10 @@ interface RepositoryInterface
      *   The number of entities to skip.
      * @param array $orderBy
      *   Optionally, the order by info, in the $column => $direction format.
+     * @param array $conditions
+     *   Optionally, the conditions
      *
      * @return array A collection of entity objects.
      */
-    public function findAll($limit, $offset = 0, $orderBy = array());
+    public function findAll($limit, $offset = 0, $orderBy = array(), $conditions = array());
 }

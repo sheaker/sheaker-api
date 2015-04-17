@@ -57,7 +57,7 @@ class UserController
             }
         }
 
-        $user->setPayments($app['repository.payment']->findAllByUser($user->id));
+        $user->setPayments($app['repository.payment']->findAll(0, 0, array(), array('user_id' => $user->id)));
 
         return json_encode($user, JSON_NUMERIC_CHECK);
     }
