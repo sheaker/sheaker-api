@@ -96,6 +96,8 @@ class PaymentController
         $payment->setPaymentDate(date('c'));
         $app['repository.payment']->save($payment);
 
+        $user->setPayments($app['repository.payment']->findAll(0, 0, array(), array('user_id' => $user->id)));
+
         return json_encode($payment, JSON_NUMERIC_CHECK);
     }
 }
