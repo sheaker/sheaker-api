@@ -86,6 +86,10 @@ $app['repository.payment'] = $app->share(function ($app) {
     return new Sheaker\Repository\PaymentRepository($app['dbs']['gym'], $app['repository.user']);
 });
 
+$app['repository.checkin'] = $app->share(function ($app) {
+    return new Sheaker\Repository\CheckinRepository($app['dbs']['gym']);
+});
+
 /**
  * Register before handler
  */
@@ -102,7 +106,7 @@ $app->before(function (Request $request, Application $app) {
     if (strpos($request->getPathInfo(), "info") === false) {
         $app['client']->fetchClient($request);
 
-        if (preg_match("/users|payments/", $request->getPathInfo())) {
+        if (preg_match("/users|payments|checkin/", $request->getPathInfo())) {
             $app['jwt']->checkTokenAuthenticity($request);
         }
     }
