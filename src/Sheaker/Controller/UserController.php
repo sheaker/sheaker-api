@@ -26,7 +26,10 @@ class UserController
         $users = $app['repository.user']->findAll($getParams['limit'], $getParams['offset'], array($getParams['sortBy'] => $getParams['order']));
 
         foreach ($users as $user) {
-            $user->setPayments($app['repository.payment']->find($user->activeMembershipId));
+            $user->setActiveMembership(array());
+            if ($user->getActiveMembershipId()) {
+                $user->setActiveMembership($app['repository.payment']->find($user->getActiveMembershipId()));
+            }
         }
 
         return json_encode(array_values($users), JSON_NUMERIC_CHECK);
@@ -57,7 +60,10 @@ class UserController
             }
         }
 
-        $user->setPayments($app['repository.payment']->findAll(0, 0, array(), array('user_id' => $user->id)));
+        $user->setActiveMembership(array());
+        if ($user->getActiveMembershipId()) {
+            $user->setActiveMembership($app['repository.payment']->find($user->getActiveMembershipId()));
+        }
 
         return json_encode($user, JSON_NUMERIC_CHECK);
     }

@@ -160,11 +160,12 @@ class User
     public $activeMembershipId;
 
     /**
-     * Array of all his payments.
+     * The active membership.
      *
-     * @var array
+     * @var \Sheaker\Entity\Payment
      */
-    public $payments;
+    public $activeMembership;
+
 
     public function getId()
     {
@@ -364,12 +365,12 @@ class User
         $this->activeMembershipId = $activeMembershipId;
     }
 
-    public function getPayments()
+    public function getActiveMembership()
     {
-        return $this->payments;
+        return $this->activeMembership;
     }
-    public function setPayments($payments)
+    public function setActiveMembership($activeMembership)
     {
-        $this->payments = $payments;
+        $this->activeMembership = $activeMembership;
     }
 }

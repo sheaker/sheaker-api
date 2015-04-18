@@ -151,7 +151,7 @@ class UserRepository implements RepositoryInterface
 
         $queryBuilder = $this->db->createQueryBuilder();
         $queryBuilder
-            ->select('u.*', 'ua.*')
+            ->select('*')
             ->addSelect('(SELECT id
                 FROM users_payments
                 WHERE user_id = u.id
@@ -218,6 +218,7 @@ class UserRepository implements RepositoryInterface
         $user->setLastIP($userData['last_ip']);
         $user->setSubscriptionDate(date('Y-m-d H:i:s', strtotime($userData['created_at'])));
         $user->setActiveMembershipId($userData['active_membership_id']);
+        $user->setActiveMembership(array());
         $user->setUserLevel($userData['user_level']);
 
         return $user;
