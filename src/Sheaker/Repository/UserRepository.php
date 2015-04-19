@@ -50,9 +50,18 @@ class UserRepository implements RepositoryInterface
 
         if ($user->getId()) {
             $this->db->update('users', $userData, array('id' => $user->getId()));
+
+            if ($user->getUserLevel()) {
+                $this->db->delete('users_access', array('user_id' => $user->getId()));
+                $this->db->insert('users_access', array('user_id' => $user->getId(), 'user_level' => $user->getUserLevel()));
+            }
         } else {
             $this->db->insert('users', $userData);
             $user->setId($this->db->lastInsertId());
+
+            if ($user->getUserLevel()) {
+                $this->db->insert('users_access', array('user_id' => $user->getId(), 'user_level' => $user->getUserLevel()));
+            }
         }
     }
 

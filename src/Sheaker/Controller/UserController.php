@@ -94,6 +94,7 @@ class UserController
         $addParams['city']           = $app->escape($request->get('city'));
         $addParams['zip']            = $app->escape($request->get('zip'));
         $addParams['gender']         = $app->escape($request->get('gender', -1));
+        $addParams['userLevel']      = $app->escape($request->get('userLevel'));
         $addParams['customId']       = $app->escape($request->get('customId', 0));
         $addParams['photo']          = $app->escape($request->get('photo'));
         $addParams['sponsor']        = $app->escape($request->get('sponsor', 0));
@@ -128,6 +129,7 @@ class UserController
         $user->setZip($addParams['zip']);
         $user->setGender($addParams['gender']);
         $user->setSponsor($addParams['sponsor']);
+        $user->setUserLevel($addParams['userLevel']);
         $user->setComment($addParams['comment']);
         $user->setLastSeen('0000-00-00 00:00:00');
         $user->setLastIP('0.0.0.0');
@@ -166,6 +168,7 @@ class UserController
         $editParams['city']           = $app->escape($request->get('city'));
         $editParams['zip']            = $app->escape($request->get('zip'));
         $editParams['gender']         = $app->escape($request->get('gender', -1));
+        $editParams['userLevel']      = $app->escape($request->get('userLevel'));
         $editParams['customId']       = $app->escape($request->get('customId', 0));
         $editParams['photo']          = $app->escape($request->get('photo'));
         $editParams['sponsor']        = $app->escape($request->get('sponsor', 0));
@@ -204,6 +207,7 @@ class UserController
         $user->setCity($editParams['city']);
         $user->setZip($editParams['zip']);
         $user->setGender($editParams['gender']);
+        $user->setUserLevel($editParams['userLevel']);
         $user->setSponsor($editParams['sponsor']);
         $user->setComment($editParams['comment']);
         $user->setPhoto($photoPath);
