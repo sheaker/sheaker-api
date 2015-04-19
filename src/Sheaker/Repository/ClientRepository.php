@@ -112,7 +112,7 @@ class ClientRepository implements RepositoryInterface
 
         $queryBuilder = $this->db->createQueryBuilder();
         $queryBuilder
-            ->select('c.*')
+            ->select('*')
             ->from('clients', 'c');
         if ($limit) {
             $queryBuilder->setMaxResults($limit);

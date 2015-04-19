@@ -91,7 +91,7 @@ $app['repository.payment'] = $app->share(function ($app) {
 });
 
 $app['repository.checkin'] = $app->share(function ($app) {
-    return new Sheaker\Repository\CheckinRepository($app['dbs']['gym']);
+    return new Sheaker\Repository\CheckinRepository($app['dbs']['gym'], $app['repository.user']);
 });
 
 /**

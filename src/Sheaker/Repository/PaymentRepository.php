@@ -100,7 +100,7 @@ class PaymentRepository implements RepositoryInterface
 
         $queryBuilder = $this->db->createQueryBuilder();
         $queryBuilder
-            ->select('up.*')
+            ->select('*')
             ->from('users_payments', 'up');
         if ($limit) {
             $queryBuilder->setMaxResults($limit);
@@ -136,11 +136,11 @@ class PaymentRepository implements RepositoryInterface
      */
     protected function buildPayment($paymentData)
     {
-        //$user = $this->userRepository->findById($paymentData['user_id']);
+        $user = $this->userRepository->findById($paymentData['user_id']);
 
         $payment = new Payment();
         $payment->setId($paymentData['id']);
-        $payment->setUser($paymentData['user_id']);
+        $payment->setUser($user);
         $payment->setDays($paymentData['days']);
         $payment->setStartDate(date('c', strtotime($paymentData['start_date'])));
         $payment->setEndDate(date('c', strtotime($paymentData['end_date'])));
