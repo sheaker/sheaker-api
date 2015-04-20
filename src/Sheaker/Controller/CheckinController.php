@@ -32,7 +32,7 @@ class CheckinController
             $checkin = $app['repository.checkin']->findAll($getParams['limit'], $getParams['offset'], array($getParams['sortBy'] => $getParams['order']));
         }
 
-        return json_encode(array_values($checkin), JSON_NUMERIC_CHECK, 5000);
+        return json_encode(array_values($checkin), JSON_NUMERIC_CHECK);
     }
 
     public function getCheckin(Request $request, Application $app)
@@ -57,7 +57,7 @@ class CheckinController
             $app->abort(Response::HTTP_NOT_FOUND, 'Checkin not found');
         }
 
-        return json_encode($checkin, JSON_NUMERIC_CHECK, 5000);
+        return json_encode($checkin, JSON_NUMERIC_CHECK);
     }
 
     public function addCheckin(Request $request, Application $app)
@@ -84,6 +84,6 @@ class CheckinController
         $checkin->setCreatedAt(date('c'));
         $app['repository.checkin']->save($checkin);
 
-        return json_encode($checkin, JSON_NUMERIC_CHECK, 5000);
+        return json_encode($checkin, JSON_NUMERIC_CHECK);
     }
 }

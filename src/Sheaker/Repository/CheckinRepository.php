@@ -15,9 +15,15 @@ class CheckinRepository implements RepositoryInterface
      */
     protected $db;
 
-    public function __construct(Connection $db)
+    /**
+     * @var \Sheaker\Repository\UserRepository
+     */
+    protected $userRepository;
+
+    public function __construct(Connection $db, $userRepository)
     {
         $this->db = $db;
+        $this->userRepository = $userRepository;
     }
 
     /**
@@ -79,7 +85,7 @@ class CheckinRepository implements RepositoryInterface
      *
      * @return array A collection of checkin.
      */
-    public function getPayments($conditions, $limit = 0, $offset = 0, $orderBy = array())
+    public function getCheckin($conditions, $limit = 0, $offset = 0, $orderBy = array())
     {
         // Provide a default orderBy.
         if (!$orderBy) {
@@ -88,7 +94,7 @@ class CheckinRepository implements RepositoryInterface
 
         $queryBuilder = $this->db->createQueryBuilder();
         $queryBuilder
-            ->select('uc.*')
+            ->select('*')
             ->from('users_checkin', 'uc');
         if ($limit) {
             $queryBuilder->setMaxResults($limit);
@@ -107,11 +113,11 @@ class CheckinRepository implements RepositoryInterface
         $statement = $queryBuilder->execute();
         $checkinData = $statement->fetchAll();
 
-        $checkin = [];
+        $checkins = [];
         foreach ($checkinData as $checkin) {
-            array_push($checkin, $this->buildCheckin($checkinData));
+            array_push($checkins, $this->buildCheckin($checkin));
         }
-        return $checkin;
+        return $checkins;
     }
 
     /**
@@ -124,11 +130,11 @@ class CheckinRepository implements RepositoryInterface
      */
     protected function buildCheckin($checkinData)
     {
-        //$user = $this->userRepository->findById($checkinData['user_id']);
+        $user = $this->userRepository->findById($checkinData['user_id']);
 
         $checkin = new Checkin();
         $checkin->setId($checkinData['id']);
-        $checkin->setUser($checkinData['user_id']);
+        $checkin->setUser($user);
         $checkin->setCreatedAt(date('c', strtotime($checkinData['created_at'])));
         return $checkin;
     }

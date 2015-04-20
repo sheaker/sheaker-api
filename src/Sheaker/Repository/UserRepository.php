@@ -50,9 +50,18 @@ class UserRepository implements RepositoryInterface
 
         if ($user->getId()) {
             $this->db->update('users', $userData, array('id' => $user->getId()));
+
+            if ($user->getUserLevel()) {
+                $this->db->delete('users_access', array('user_id' => $user->getId()));
+                $this->db->insert('users_access', array('user_id' => $user->getId(), 'user_level' => $user->getUserLevel()));
+            }
         } else {
             $this->db->insert('users', $userData);
             $user->setId($this->db->lastInsertId());
+
+            if ($user->getUserLevel()) {
+                $this->db->insert('users_access', array('user_id' => $user->getId(), 'user_level' => $user->getUserLevel()));
+            }
         }
     }
 
@@ -151,7 +160,7 @@ class UserRepository implements RepositoryInterface
 
         $queryBuilder = $this->db->createQueryBuilder();
         $queryBuilder
-            ->select('u.*', 'ua.*')
+            ->select('*')
             ->addSelect('(SELECT id
                 FROM users_payments
                 WHERE user_id = u.id
@@ -218,6 +227,7 @@ class UserRepository implements RepositoryInterface
         $user->setLastIP($userData['last_ip']);
         $user->setSubscriptionDate(date('Y-m-d H:i:s', strtotime($userData['created_at'])));
         $user->setActiveMembershipId($userData['active_membership_id']);
+        $user->setActiveMembership(array());
         $user->setUserLevel($userData['user_level']);
 
         return $user;
