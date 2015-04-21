@@ -34,7 +34,7 @@ CREATE TABLE `users` (
   `last_ip` varchar(255) NOT NULL DEFAULT '0.0.0.0',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=783 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 
 CREATE TABLE `users_access` (
@@ -53,7 +53,7 @@ CREATE TABLE `users_checkin` (
   PRIMARY KEY (`id`),
   KEY `idx_user_id` (`user_id`) USING BTREE,
   FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=38 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 
 CREATE TABLE `users_payments` (
@@ -69,7 +69,7 @@ CREATE TABLE `users_payments` (
   PRIMARY KEY (`id`),
   KEY `idx_user_id` (`user_id`) USING BTREE,
   FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=780 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 
 
