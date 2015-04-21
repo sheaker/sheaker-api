@@ -1,12 +1,13 @@
 #
 # SQL Export
-# Created by Querious (962)
-# Created: April 3, 2015 at 9:32:29 AM CST
+# Created by Querious (971)
+# Created: April 21, 2015 at 8:26:40 AM CDT
 # Encoding: Unicode (UTF-8)
 #
 
 
 DROP TABLE IF EXISTS `users_payments`;
+DROP TABLE IF EXISTS `users_checkin`;
 DROP TABLE IF EXISTS `users_access`;
 DROP TABLE IF EXISTS `users`;
 
@@ -33,7 +34,7 @@ CREATE TABLE `users` (
   `last_ip` varchar(255) NOT NULL DEFAULT '0.0.0.0',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 
 CREATE TABLE `users_access` (
@@ -43,6 +44,16 @@ CREATE TABLE `users_access` (
   KEY `idx_user_id` (`user_id`) USING BTREE,
   FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+CREATE TABLE `users_checkin` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) unsigned DEFAULT '0',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_user_id` (`user_id`) USING BTREE,
+  FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 
 CREATE TABLE `users_payments` (
@@ -58,7 +69,7 @@ CREATE TABLE `users_payments` (
   PRIMARY KEY (`id`),
   KEY `idx_user_id` (`user_id`) USING BTREE,
   FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 
 

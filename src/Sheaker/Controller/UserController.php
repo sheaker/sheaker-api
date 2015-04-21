@@ -102,7 +102,7 @@ class UserController
 
         $photoPath = '';
         if (!empty($addParams['photo'])) {
-            $clientPhotosPath = 'photos/' . $app->escape($request->get('client'));
+            $clientPhotosPath = 'photos/' . $app->escape($request->get('id_client'));
             if (!file_exists($clientPhotosPath)) {
                 mkdir($clientPhotosPath);
             }
@@ -185,7 +185,7 @@ class UserController
                 unlink($user->getPhoto());
             }
 
-            $clientPhotosPath = 'photos/' . $app->escape($request->get('client'));
+            $clientPhotosPath = 'photos/' . $app->escape($request->get('id_client'));
             if (!file_exists($clientPhotosPath)) {
                 mkdir($clientPhotosPath);
             }
