@@ -1,7 +1,7 @@
 #
 # SQL Export
-# Created by Querious (962)
-# Created: April 6, 2015 at 8:56:12 AM CDT
+# Created by Querious (971)
+# Created: April 21, 2015 at 8:28:37 AM CDT
 # Encoding: Unicode (UTF-8)
 #
 
@@ -34,7 +34,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 LOCK TABLES `clients` WRITE;
 ALTER TABLE `clients` DISABLE KEYS;
 INSERT INTO `clients` (`id`, `name`, `subdomain`, `secret_key`, `created_at`) VALUES 
-	(1,'Force Gym','forcegym','MmSfT76E3cvJE3vPpxfv0TZ2flq679IT','2015-04-06 00:00:00');
+	(1,'My Gym','mygym','MmSfT76E3cvJE3vPpxfv0TZ2flq679IT','2015-04-06 00:00:00');
 ALTER TABLE `clients` ENABLE KEYS;
 UNLOCK TABLES;
 
@@ -46,7 +46,8 @@ INSERT INTO `reserved_subdomains` (`subdomain`) VALUES
 	('ftp'),
 	('sheaker'),
 	('api'),
-	('dev');
+	('dev'),
+	('test');
 ALTER TABLE `reserved_subdomains` ENABLE KEYS;
 UNLOCK TABLES;
 
