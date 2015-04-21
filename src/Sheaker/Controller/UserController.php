@@ -88,7 +88,7 @@ class UserController
 
         $addParams['phone']          = $app->escape($request->get('phone'));
         $addParams['mail']           = $app->escape($request->get('mail'));
-        $addParams['birthdate']      = $app->escape($request->get('birthdate'));
+        $addParams['birthdate']      = $app->escape($request->get('birthdate', '0000-00-00'));
         $addParams['addressStreet1'] = $app->escape($request->get('addressStreet1'));
         $addParams['addressStreet2'] = $app->escape($request->get('addressStreet2'));
         $addParams['city']           = $app->escape($request->get('city'));
@@ -122,7 +122,7 @@ class UserController
         $user->setPassword(password_hash($generatedPassword, PASSWORD_DEFAULT));
         $user->setPhone($addParams['phone']);
         $user->setMail($addParams['mail']);
-        $user->setBirthdate(date('Y-m-d H:i:s', strtotime($addParams['birthdate'])));
+        $user->setBirthdate($addParams['birthdate']);
         $user->setAddressStreet1($addParams['addressStreet1']);
         $user->setAddressStreet2($addParams['addressStreet2']);
         $user->setCity($addParams['city']);
@@ -162,7 +162,7 @@ class UserController
 
         $editParams['phone']          = $app->escape($request->get('phone'));
         $editParams['mail']           = $app->escape($request->get('mail'));
-        $editParams['birthdate']      = $app->escape($request->get('birthdate'));
+        $editParams['birthdate']      = $app->escape($request->get('birthdate', '0000-00-00'));
         $editParams['addressStreet1'] = $app->escape($request->get('addressStreet1'));
         $editParams['addressStreet2'] = $app->escape($request->get('addressStreet2'));
         $editParams['city']           = $app->escape($request->get('city'));
