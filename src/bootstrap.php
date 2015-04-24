@@ -29,8 +29,9 @@ if ($app['debug']) {
 
 $app['api.accessLevels'] = [
     0 => 'client',
-    1 => 'modo',
-    2 => 'admin'
+    1 => 'user',
+    2 => 'modo',
+    3 => 'admin'
 ];
 
 /**
