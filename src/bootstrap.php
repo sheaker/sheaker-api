@@ -27,6 +27,8 @@ if ($app['debug']) {
     require_once __DIR__ . '/../config/production.php';
 }
 
+date_default_timezone_set($app['timezone']);
+
 $app['api.accessLevels'] = [
     0 => 'client',
     1 => 'user',

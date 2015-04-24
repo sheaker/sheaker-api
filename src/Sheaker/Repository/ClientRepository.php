@@ -155,7 +155,7 @@ class ClientRepository implements RepositoryInterface
         $client->setName($clientData['name']);
         $client->setSubdomain($clientData['subdomain']);
         $client->setSecretKey($clientData['secret_key']);
-        $client->setCreatedAt($clientData['created_at']);
+        $client->setCreatedAt(date('c', strtotime($clientData['created_at'])));
 
         return $client;
     }

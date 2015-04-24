@@ -88,8 +88,8 @@ class PaymentController
         $payment = new Payment();
         $payment->setUser($user);
         $payment->setDays($addParams['days']);
-        $payment->setStartDate(date('Y-m-d H:i:s', strtotime($addParams['startDate'])));
-        $payment->setEndDate(date('Y-m-d H:i:s', strtotime($addParams['endDate'])));
+        $payment->setStartDate(date('c', strtotime($addParams['startDate'])));
+        $payment->setEndDate(date('c', strtotime($addParams['endDate'])));
         $payment->setComment($addParams['comment']);
         $payment->setPrice($addParams['price']);
         $payment->setMethod($addParams['method']);
