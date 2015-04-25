@@ -153,6 +153,13 @@ class User
     public $subscriptionDate;
 
     /**
+     * last user checkins.
+     *
+     * @var array
+     */
+    public $lastCheckins;
+
+    /**
      * The active membership id.
      *
      * @var integer
@@ -354,6 +361,15 @@ class User
     public function setSubscriptionDate($subscriptionDate)
     {
         $this->subscriptionDate = $subscriptionDate;
+    }
+
+    public function getLastCheckins()
+    {
+        return $this->lastCheckins;
+    }
+    public function setLastCheckins($lastCheckins)
+    {
+        $this->lastCheckins = $lastCheckins;
     }
 
     public function getActiveMembershipId()

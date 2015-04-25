@@ -14,9 +14,9 @@ class Checkin
     /**
      * User.
      *
-     * @var \Sheaker\Entity\User
+     * @var integer
      */
-    public $user;
+    public $userId;
 
     /**
      * When the checkin entity was created.
@@ -34,13 +34,13 @@ class Checkin
         return $this->id = $id;
     }
 
-    public function getUser()
+    public function getUserId()
     {
-        return $this->user;
+        return $this->userId;
     }
-    public function setUser($user)
+    public function setUserId($userId)
     {
-        return $this->user = $user;
+        return $this->userId = $userId;
     }
 
     public function getCreatedAt()
