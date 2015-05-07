@@ -28,7 +28,7 @@ class CheckinRepository implements RepositoryInterface
     public function save($checkin)
     {
         $checkinData = array(
-            'user_id' => $checkin->getUser()->getId(),
+            'user_id' => $checkin->getUserId(),
         );
 
         $this->db->insert('users_checkin', $checkinData);

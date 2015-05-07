@@ -28,7 +28,7 @@ class PaymentRepository implements RepositoryInterface
     public function save($payment)
     {
         $paymentData = array(
-            'user_id'    => $payment->getUser()->getId(),
+            'user_id'    => $payment->getUserId(),
             'days'       => $payment->getDays(),
             'start_date' => $payment->getStartDate(),
             'end_date'   => $payment->getEndDate(),

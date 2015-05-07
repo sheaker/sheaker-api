@@ -77,10 +77,8 @@ class CheckinController
             }
         }
 
-        $user = $app['repository.user']->findById($addParams['user']);
-
         $checkin = new Checkin();
-        $checkin->setUser($user);
+        $checkin->setUserId($addParams['user']);
         $checkin->setCreatedAt(date('c'));
         $app['repository.checkin']->save($checkin);
 

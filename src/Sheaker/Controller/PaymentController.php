@@ -83,10 +83,8 @@ class PaymentController
 
         $addParams['comment'] = $app->escape($request->get('comment'));
 
-        $user = $app['repository.user']->findById($addParams['user']);
-
         $payment = new Payment();
-        $payment->setUser($user);
+        $payment->setUserId($addParams['user']);
         $payment->setDays($addParams['days']);
         $payment->setStartDate(date('c', strtotime($addParams['startDate'])));
         $payment->setEndDate(date('c', strtotime($addParams['endDate'])));
