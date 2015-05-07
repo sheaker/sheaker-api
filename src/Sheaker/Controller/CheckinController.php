@@ -14,7 +14,7 @@ class CheckinController
     {
         $token = $app['jwt']->getDecodedToken();
 
-        if (!in_array('admin', $token->user->permissions) && !in_array('modo', $token->user->permissions)) {
+        if (!in_array('admin', $token->user->permissions) && !in_array('modo', $token->user->permissions) && !in_array('user', $token->user->permissions)){
             $app->abort(Response::HTTP_FORBIDDEN, 'Forbidden');
         }
 
@@ -39,7 +39,7 @@ class CheckinController
     {
         $token = $app['jwt']->getDecodedToken();
 
-        if (!in_array('admin', $token->user->permissions) && !in_array('modo', $token->user->permissions)) {
+        if (!in_array('admin', $token->user->permissions) && !in_array('modo', $token->user->permissions) && !in_array('user', $token->user->permissions)) {
             $app->abort(Response::HTTP_FORBIDDEN, 'Forbidden');
         }
 
@@ -64,7 +64,7 @@ class CheckinController
     {
         $token = $app['jwt']->getDecodedToken();
 
-        if (!in_array('admin', $token->user->permissions) && !in_array('modo', $token->user->permissions)) {
+        if (!in_array('admin', $token->user->permissions) && !in_array('modo', $token->user->permissions) && !in_array('user', $token->user->permissions)) {
             $app->abort(Response::HTTP_FORBIDDEN, 'Forbidden');
         }
 
@@ -77,10 +77,8 @@ class CheckinController
             }
         }
 
-        $user = $app['repository.user']->findById($addParams['user']);
-
         $checkin = new Checkin();
-        $checkin->setUser($user);
+        $checkin->setUserId($addParams['user']);
         $checkin->setCreatedAt(date('c'));
         $app['repository.checkin']->save($checkin);
 

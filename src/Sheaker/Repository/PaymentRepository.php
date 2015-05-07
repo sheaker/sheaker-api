@@ -15,15 +15,9 @@ class PaymentRepository implements RepositoryInterface
      */
     protected $db;
 
-    /**
-     * @var \Sheaker\Repository\UserRepository
-     */
-    protected $userRepository;
-
-    public function __construct(Connection $db, $userRepository)
+    public function __construct(Connection $db)
     {
         $this->db = $db;
-        $this->userRepository = $userRepository;
     }
 
     /**
@@ -34,7 +28,7 @@ class PaymentRepository implements RepositoryInterface
     public function save($payment)
     {
         $paymentData = array(
-            'user_id'    => $payment->getUser()->getId(),
+            'user_id'    => $payment->getUserId(),
             'days'       => $payment->getDays(),
             'start_date' => $payment->getStartDate(),
             'end_date'   => $payment->getEndDate(),
@@ -136,11 +130,9 @@ class PaymentRepository implements RepositoryInterface
      */
     protected function buildPayment($paymentData)
     {
-        $user = $this->userRepository->findById($paymentData['user_id']);
-
         $payment = new Payment();
         $payment->setId($paymentData['id']);
-        $payment->setUser($user);
+        $payment->setUserId($paymentData['user_id']);
         $payment->setDays($paymentData['days']);
         $payment->setStartDate(date('c', strtotime($paymentData['start_date'])));
         $payment->setEndDate(date('c', strtotime($paymentData['end_date'])));
@@ -148,6 +140,7 @@ class PaymentRepository implements RepositoryInterface
         $payment->setPrice($paymentData['price']);
         $payment->setMethod($paymentData['method']);
         $payment->setPaymentDate(date('c', strtotime($paymentData['created_at'])));
+
         return $payment;
     }
 }

@@ -27,10 +27,13 @@ if ($app['debug']) {
     require_once __DIR__ . '/../config/production.php';
 }
 
+date_default_timezone_set($app['timezone']);
+
 $app['api.accessLevels'] = [
     0 => 'client',
-    1 => 'modo',
-    2 => 'admin'
+    1 => 'user',
+    2 => 'modo',
+    3 => 'admin'
 ];
 
 /**
@@ -87,11 +90,11 @@ $app['repository.user'] = $app->share(function ($app) {
 });
 
 $app['repository.payment'] = $app->share(function ($app) {
-    return new Sheaker\Repository\PaymentRepository($app['dbs']['gym'], $app['repository.user']);
+    return new Sheaker\Repository\PaymentRepository($app['dbs']['gym']);
 });
 
 $app['repository.checkin'] = $app->share(function ($app) {
-    return new Sheaker\Repository\CheckinRepository($app['dbs']['gym'], $app['repository.user']);
+    return new Sheaker\Repository\CheckinRepository($app['dbs']['gym']);
 });
 
 /**

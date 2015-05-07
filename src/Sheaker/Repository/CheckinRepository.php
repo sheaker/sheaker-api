@@ -15,15 +15,9 @@ class CheckinRepository implements RepositoryInterface
      */
     protected $db;
 
-    /**
-     * @var \Sheaker\Repository\UserRepository
-     */
-    protected $userRepository;
-
-    public function __construct(Connection $db, $userRepository)
+    public function __construct(Connection $db)
     {
         $this->db = $db;
-        $this->userRepository = $userRepository;
     }
 
     /**
@@ -34,7 +28,7 @@ class CheckinRepository implements RepositoryInterface
     public function save($checkin)
     {
         $checkinData = array(
-            'user_id' => $checkin->getUser()->getId(),
+            'user_id' => $checkin->getUserId(),
         );
 
         $this->db->insert('users_checkin', $checkinData);
@@ -130,12 +124,11 @@ class CheckinRepository implements RepositoryInterface
      */
     protected function buildCheckin($checkinData)
     {
-        $user = $this->userRepository->findById($checkinData['user_id']);
-
         $checkin = new Checkin();
         $checkin->setId($checkinData['id']);
-        $checkin->setUser($user);
+        $checkin->setUserId($checkinData['user_id']);
         $checkin->setCreatedAt(date('c', strtotime($checkinData['created_at'])));
+
         return $checkin;
     }
 }

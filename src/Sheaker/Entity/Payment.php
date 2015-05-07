@@ -12,11 +12,11 @@ class Payment
     public $id;
 
     /**
-     * User.
+     * User id.
      *
-     * @var \Sheaker\Entity\User
+     * @var integer
      */
-    public $user;
+    public $userId;
 
     /**
      * Number of days of the subscription.
@@ -76,13 +76,13 @@ class Payment
         return $this->id = $id;
     }
 
-    public function getUser()
+    public function getUserId()
     {
-        return $this->user;
+        return $this->userId;
     }
-    public function setUser($user)
+    public function setUserId($userId)
     {
-        return $this->user = $user;
+        return $this->userId = $userId;
     }
 
     public function getDays()

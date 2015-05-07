@@ -13,7 +13,7 @@ class PaymentController
     {
         $token = $app['jwt']->getDecodedToken();
 
-        if (!in_array('admin', $token->user->permissions) && !in_array('modo', $token->user->permissions)) {
+        if (!in_array('admin', $token->user->permissions) && !in_array('modo', $token->user->permissions) && !in_array('user', $token->user->permissions)) {
             $app->abort(Response::HTTP_FORBIDDEN, 'Forbidden');
         }
 
@@ -38,7 +38,7 @@ class PaymentController
     {
         $token = $app['jwt']->getDecodedToken();
 
-        if (!in_array('admin', $token->user->permissions) && !in_array('modo', $token->user->permissions)) {
+        if (!in_array('admin', $token->user->permissions) && !in_array('modo', $token->user->permissions) && !in_array('user', $token->user->permissions)) {
             $app->abort(Response::HTTP_FORBIDDEN, 'Forbidden');
         }
 
@@ -83,13 +83,11 @@ class PaymentController
 
         $addParams['comment'] = $app->escape($request->get('comment'));
 
-        $user = $app['repository.user']->findById($addParams['user']);
-
         $payment = new Payment();
-        $payment->setUser($user);
+        $payment->setUserId($addParams['user']);
         $payment->setDays($addParams['days']);
-        $payment->setStartDate(date('Y-m-d H:i:s', strtotime($addParams['startDate'])));
-        $payment->setEndDate(date('Y-m-d H:i:s', strtotime($addParams['endDate'])));
+        $payment->setStartDate(date('c', strtotime($addParams['startDate'])));
+        $payment->setEndDate(date('c', strtotime($addParams['endDate'])));
         $payment->setComment($addParams['comment']);
         $payment->setPrice($addParams['price']);
         $payment->setMethod($addParams['method']);

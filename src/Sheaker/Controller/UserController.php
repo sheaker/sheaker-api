@@ -13,7 +13,7 @@ class UserController
     {
         $token = $app['jwt']->getDecodedToken();
 
-        if (!in_array('admin', $token->user->permissions) && !in_array('modo', $token->user->permissions)) {
+        if (!in_array('admin', $token->user->permissions) && !in_array('modo', $token->user->permissions) && !in_array('user', $token->user->permissions)) {
             $app->abort(Response::HTTP_FORBIDDEN, 'Forbidden');
         }
 
@@ -30,6 +30,8 @@ class UserController
             if ($user->getActiveMembershipId()) {
                 $user->setActiveMembership($app['repository.payment']->find($user->getActiveMembershipId()));
             }
+
+            $user->setLastCheckins($app['repository.checkin']->findAll(3, 0, array('created_at' => 'DESC'), array('user_id' => $user->getId())));
         }
 
         return json_encode(array_values($users), JSON_NUMERIC_CHECK);
@@ -39,7 +41,7 @@ class UserController
     {
         $token = $app['jwt']->getDecodedToken();
 
-        if (!in_array('admin', $token->user->permissions) && !in_array('modo', $token->user->permissions)) {
+        if (!in_array('admin', $token->user->permissions) && !in_array('modo', $token->user->permissions) && !in_array('user', $token->user->permissions)) {
             $app->abort(Response::HTTP_FORBIDDEN, 'Forbidden');
         }
 
@@ -88,7 +90,7 @@ class UserController
 
         $addParams['phone']          = $app->escape($request->get('phone'));
         $addParams['mail']           = $app->escape($request->get('mail'));
-        $addParams['birthdate']      = $app->escape($request->get('birthdate'));
+        $addParams['birthdate']      = $app->escape($request->get('birthdate', '0000-00-00'));
         $addParams['addressStreet1'] = $app->escape($request->get('addressStreet1'));
         $addParams['addressStreet2'] = $app->escape($request->get('addressStreet2'));
         $addParams['city']           = $app->escape($request->get('city'));
@@ -122,7 +124,7 @@ class UserController
         $user->setPassword(password_hash($generatedPassword, PASSWORD_DEFAULT));
         $user->setPhone($addParams['phone']);
         $user->setMail($addParams['mail']);
-        $user->setBirthdate(date('Y-m-d H:i:s', strtotime($addParams['birthdate'])));
+        $user->setBirthdate($addParams['birthdate']);
         $user->setAddressStreet1($addParams['addressStreet1']);
         $user->setAddressStreet2($addParams['addressStreet2']);
         $user->setCity($addParams['city']);
@@ -162,7 +164,7 @@ class UserController
 
         $editParams['phone']          = $app->escape($request->get('phone'));
         $editParams['mail']           = $app->escape($request->get('mail'));
-        $editParams['birthdate']      = $app->escape($request->get('birthdate'));
+        $editParams['birthdate']      = $app->escape($request->get('birthdate', '0000-00-00'));
         $editParams['addressStreet1'] = $app->escape($request->get('addressStreet1'));
         $editParams['addressStreet2'] = $app->escape($request->get('addressStreet2'));
         $editParams['city']           = $app->escape($request->get('city'));

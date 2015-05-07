@@ -6,3 +6,5 @@
 $app['database.host']   = '127.0.0.1';
 $app['database.user']   = 'root';
 $app['database.passwd'] = '';
+
+$app['timezone'] = 'UTC';

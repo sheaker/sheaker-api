@@ -223,9 +223,9 @@ class UserRepository implements RepositoryInterface
         $user->setSponsor($userData['sponsor_id']);
         $user->setComment($userData['comment']);
         $user->setFailedLogins($userData['failed_logins']);
-        $user->setLastSeen(date('Y-m-d H:i:s', strtotime($userData['last_seen'])));
+        $user->setLastSeen(date('c', strtotime($userData['last_seen'])));
         $user->setLastIP($userData['last_ip']);
-        $user->setSubscriptionDate(date('Y-m-d H:i:s', strtotime($userData['created_at'])));
+        $user->setSubscriptionDate(date('c', strtotime($userData['created_at'])));
         $user->setActiveMembershipId($userData['active_membership_id']);
         $user->setActiveMembership(array());
         $user->setUserLevel($userData['user_level']);
