@@ -67,6 +67,8 @@ class UserController
             $user->setActiveMembership($app['repository.payment']->find($user->getActiveMembershipId()));
         }
 
+        $user->setLastCheckins($app['repository.checkin']->findAll(3, 0, array('created_at' => 'DESC'), array('user_id' => $user->getId())));
+
         return json_encode($user, JSON_NUMERIC_CHECK);
     }
 
