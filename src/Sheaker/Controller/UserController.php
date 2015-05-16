@@ -219,4 +219,31 @@ class UserController
 
         return json_encode($user, JSON_NUMERIC_CHECK);
     }
+
+    public function deleteUser(Request $request, Application $app)
+    {
+        $token = $app['jwt']->getDecodedToken();
+
+        if (!in_array('admin', $token->user->permissions)) {
+            $app->abort(Response::HTTP_FORBIDDEN, 'Forbidden');
+        }
+
+        $deleteParams = [];
+        $deleteParams['id'] = $app->escape($request->get('id'));
+
+        foreach ($deleteParams as $value) {
+            if (!isset($value)) {
+                $app->abort(Response::HTTP_BAD_REQUEST, 'Missing parameters');
+            }
+        }
+
+        $user = $app['repository.user']->findById($deleteParams['id']);
+        if (!$user) {
+            $app->abort(Response::HTTP_NOT_FOUND, 'User not found');
+        }
+
+        $app['repository.user']->delete($user->id);
+
+        return json_encode($user, JSON_NUMERIC_CHECK);
+    }
 }
