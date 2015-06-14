@@ -8,6 +8,7 @@ use Silex\Provider\DoctrineServiceProvider;
 use Silex\Provider\MonologServiceProvider;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Elasticsearch\Client;
 
 define('APPLICATION_ENV', getenv('APPLICATION_ENV') ?: 'production');
 
@@ -66,6 +67,10 @@ $app->register(new MonologServiceProvider(), [
     'monolog.level'   => Logger::WARNING,
     'monolog.name'    => 'api'
 ]);
+
+$app['elasticsearch'] = function() {
+  return new Client(array());
+};
 
 /**
  * Register our custom services
