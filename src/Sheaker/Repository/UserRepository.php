@@ -140,6 +140,16 @@ class UserRepository implements RepositoryInterface
     }
 
     /**
+     * Deletes the entity.
+     *
+     * @param integer $id
+     */
+    public function delete($id)
+    {
+        $this->db->delete('users', [ 'id' => $id ]);
+    }
+
+    /**
      * Returns a collection of users.
      *
      * @param integer $limit

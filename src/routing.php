@@ -11,10 +11,11 @@ $app->post('/renew_token', 'Sheaker\Controller\MainController::renewToken');
 /**
  * Users routes
  */
-$app->get('/users',      'Sheaker\Controller\UserController::getUsersList');
-$app->get('/users/{id}', 'Sheaker\Controller\UserController::getUser');
-$app->post('/users',     'Sheaker\Controller\UserController::addUser');
-$app->put('/users/{id}', 'Sheaker\Controller\UserController::editUser');
+$app->get('/users',         'Sheaker\Controller\UserController::getUsersList');
+$app->get('/users/{id}',    'Sheaker\Controller\UserController::getUser');
+$app->post('/users',        'Sheaker\Controller\UserController::addUser');
+$app->put('/users/{id}',    'Sheaker\Controller\UserController::editUser');
+$app->delete('/users/{id}', 'Sheaker\Controller\UserController::deleteUser');
 
 /**
  * Payments routes

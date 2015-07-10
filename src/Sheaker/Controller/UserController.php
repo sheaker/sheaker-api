@@ -30,8 +30,6 @@ class UserController
             if ($user->getActiveMembershipId()) {
                 $user->setActiveMembership($app['repository.payment']->find($user->getActiveMembershipId()));
             }
-
-            $user->setLastCheckins($app['repository.checkin']->findAll(3, 0, array('created_at' => 'DESC'), array('user_id' => $user->getId())));
         }
 
         return json_encode(array_values($users), JSON_NUMERIC_CHECK);
@@ -66,6 +64,8 @@ class UserController
         if ($user->getActiveMembershipId()) {
             $user->setActiveMembership($app['repository.payment']->find($user->getActiveMembershipId()));
         }
+
+        $user->setLastCheckins($app['repository.checkin']->findAll(3, 0, array('created_at' => 'DESC'), array('user_id' => $user->getId())));
 
         return json_encode($user, JSON_NUMERIC_CHECK);
     }
@@ -214,6 +214,33 @@ class UserController
         $user->setComment($editParams['comment']);
         $user->setPhoto($photoPath);
         $app['repository.user']->save($user);
+
+        return json_encode($user, JSON_NUMERIC_CHECK);
+    }
+
+    public function deleteUser(Request $request, Application $app)
+    {
+        $token = $app['jwt']->getDecodedToken();
+
+        if (!in_array('admin', $token->user->permissions)) {
+            $app->abort(Response::HTTP_FORBIDDEN, 'Forbidden');
+        }
+
+        $deleteParams = [];
+        $deleteParams['id'] = $app->escape($request->get('id'));
+
+        foreach ($deleteParams as $value) {
+            if (!isset($value)) {
+                $app->abort(Response::HTTP_BAD_REQUEST, 'Missing parameters');
+            }
+        }
+
+        $user = $app['repository.user']->findById($deleteParams['id']);
+        if (!$user) {
+            $app->abort(Response::HTTP_NOT_FOUND, 'User not found');
+        }
+
+        $app['repository.user']->delete($user->id);
 
         return json_encode($user, JSON_NUMERIC_CHECK);
     }
