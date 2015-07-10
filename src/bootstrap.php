@@ -68,8 +68,8 @@ $app->register(new MonologServiceProvider(), [
     'monolog.name'    => 'api'
 ]);
 
-$app['elasticsearch'] = function() {
-  return new Client(array());
+$app['elasticsearch.client'] = function() {
+  return new Client($app['elasticsearch.hosts']);
 };
 
 /**
