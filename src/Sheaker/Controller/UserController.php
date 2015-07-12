@@ -18,11 +18,12 @@ class UserController
         }
 
         $getParams = [];
-        $getParams['limit']  = $app->escape($request->get('limit'));
         $getParams['offset'] = $app->escape($request->get('offset', 0));
+        $getParams['limit']  = $app->escape($request->get('limit',  50));
         $getParams['sortBy'] = $app->escape($request->get('sortBy', 'created_at'));
-        $getParams['order']  = $app->escape($request->get('order',  'DESC'));
+        $getParams['order']  = $app->escape($request->get('order',  'desc'));
 
+        /*
         $users = $app['repository.user']->findAll($getParams['limit'], $getParams['offset'], array($getParams['sortBy'] => $getParams['order']));
 
         foreach ($users as $user) {
@@ -33,8 +34,28 @@ class UserController
 
             $user->setLastCheckins($app['repository.checkin']->findAll(3, 0, array('created_at' => 'DESC'), array('user_id' => $user->getId())));
         }
+        */
 
-        return json_encode(array_values($users), JSON_NUMERIC_CHECK);
+        $params = [];
+        $params['index'] = 'client_' . $app->escape($request->get('id_client'));
+        $params['type']  = 'user';
+        $params['body']['from']  = $getParams['offset'];
+        $params['body']['size']  = $getParams['limit'];
+        $params['body']['query'] = [
+            'match_all' => new \stdClass()
+        ];
+        $params['body']['sort'] = [
+            [ $getParams['sortBy'] => $getParams['order'] ]
+        ];
+
+        $queryResponse = $app['elasticsearch.client']->search($params);
+
+        $results = [];
+        foreach ($queryResponse['hits']['hits'] as $key => $doc) {
+            array_push($results, $doc['_source']);
+        }
+
+        return json_encode(array_values($results), JSON_NUMERIC_CHECK);
     }
 
     public function getUser(Request $request, Application $app)

@@ -15,7 +15,8 @@ $app['elasticsearch.config'] = [
         '127.0.0.1:9200'
     ],
     'logging' => true,
-    'logPath' => __DIR__ . '/../logs/elasticsearch.log'
+    'logPath' => __DIR__ . '/../logs/elasticsearch.log',
+    'connectionClass' => '\Elasticsearch\Connections\CurlMultiConnection'
 ];
 
 /**
