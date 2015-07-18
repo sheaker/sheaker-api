@@ -17,7 +17,7 @@ $app->post('/users',                  'Sheaker\Controller\UserController::addUse
 $app->put('/users/{id}',              'Sheaker\Controller\UserController::editUser');
 $app->delete('/users/{id}',           'Sheaker\Controller\UserController::deleteUser');
 $app->get('/users/stats',             'Sheaker\Controller\UserController::statsUsers');
-$app->get('/users/stats/new',         'Sheaker\Controller\UserController::newUser');
+$app->get('/users/stats/new',         'Sheaker\Controller\UserController::newUsers');
 $app->get('/users/stats/incbirthday', 'Sheaker\Controller\UserController::incUsersBirthdays');
 
 /**
