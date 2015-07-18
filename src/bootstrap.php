@@ -7,6 +7,7 @@ use Monolog\Logger;
 use Silex\Provider\DoctrineServiceProvider;
 use Silex\Provider\MonologServiceProvider;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Elasticsearch\Client;
 
@@ -122,6 +123,13 @@ $app->before(function (Request $request, Application $app) {
             $app['jwt']->checkTokenAuthenticity($request);
         }
     }
+});
+
+/**
+ * Register after handler
+ */
+$app->after(function (Request $request, Response $response) {
+    $response->headers->set('Content-Type', 'application/json');
 });
 
 /**
