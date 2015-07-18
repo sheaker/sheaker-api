@@ -16,12 +16,33 @@ class ElasticSearchController
         //    $app->abort(Response::HTTP_FORBIDDEN, 'Forbidden');
         //}
 
+        // First, delete existing index
         $params['index'] = 'client_' . $app->escape($request->get('id_client'));
-        //$app['elasticsearch.client']->indices()->delete($params['index']);
-        //$app['elasticsearch.client']->indices()->create($params['index']);
 
+        if ($app['elasticsearch.client']->indices()->exists(['index' => $params['index']]))
+            $app['elasticsearch.client']->indices()->delete($params);
+
+        // Then, create a new index with the mapping inside
+        $params['body']['mappings']['user'] = [
+            '_source' => [
+                'enabled' => true
+            ],
+            'properties' => [
+                'payments' => [
+                    'type' => 'nested',
+                ],
+                'checkins' => [
+                    'type' => 'nested'
+                ]
+            ]
+        ];
+        if (!$app['elasticsearch.client']->indices()->exists(['index' => $params['index']]))
+            $app['elasticsearch.client']->indices()->create($params);
+
+        unset($params['body']['mappings']); // Delete mapping field from previous query
         $params['type']  = 'user';
 
+        // Now, retrieve and put datas
         $users = $app['repository.user']->findAll(0, 0, ['created_at' => 'asc']);
         foreach ($users as $u)
         {
@@ -73,6 +94,7 @@ class ElasticSearchController
                 'last_seen'        => ($u->getLastSeen() != '0000-00-00') ? $u->getLastSeen() : null,
                 'last_ip'          => $u->getLastIP(),
                 'failed_logins'    => $u->getFailedLogins(),
+                'created_at'       => $u->getSubscriptionDate(),
                 'payments'         => $payments,
                 'checkins'         => $checkins
             ];
