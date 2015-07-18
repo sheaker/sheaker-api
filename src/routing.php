@@ -30,3 +30,8 @@ $app->post('/payments',     'Sheaker\Controller\PaymentController::addPayment');
 $app->get('/checkin',      'Sheaker\Controller\CheckinController::getCheckinList');
 $app->get('/checkin/{id}', 'Sheaker\Controller\CheckinController::getCheckin');
 $app->post('/checkin',     'Sheaker\Controller\CheckinController::addCheckin');
+
+/**
+ * Elasticsearch routes
+ */
+$app->post('/elasticsearch/indexing', 'Sheaker\Controller\ElasticSearchController::indexing');
