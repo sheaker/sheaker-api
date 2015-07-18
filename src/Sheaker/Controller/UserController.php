@@ -267,4 +267,22 @@ class UserController
 
         return json_encode($user, JSON_NUMERIC_CHECK);
     }
+
+    /*
+     * Stats
+     */
+    public function statsUsers(Request $request, Application $app)
+    {
+
+    }
+
+    public function newUsers(Request $request, Application $app)
+    {
+
+    }
+
+    public function incUsersBirthdays(Request $request, Application $app)
+    {
+
+    }
 }

@@ -96,4 +96,17 @@ class PaymentController
 
         return json_encode($payment, JSON_NUMERIC_CHECK);
     }
+
+    /*
+     * Stats
+     */
+    public function newMemberships(Request $request, Application $app)
+    {
+
+    }
+
+    public function endingMemberships(Request $request, Application $app)
+    {
+
+    }
 }

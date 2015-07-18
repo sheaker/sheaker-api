@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\Response;
 class CheckinController
 {
 
-    public function getCheckinList(Request $request, Application $app)
+    public function getCheckinsList(Request $request, Application $app)
     {
         $token = $app['jwt']->getDecodedToken();
 
@@ -111,5 +111,13 @@ class CheckinController
         $app['repository.checkin']->save($checkin);
 
         return json_encode($checkin, JSON_NUMERIC_CHECK);
+    }
+
+    /*
+     * Stats
+     */
+    public function newCheckins(Request $request, Application $app)
+    {
+
     }
 }
