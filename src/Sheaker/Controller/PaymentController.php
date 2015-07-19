@@ -102,7 +102,28 @@ class PaymentController
      */
     public function newMemberships(Request $request, Application $app)
     {
+        $token = $app['jwt']->getDecodedToken();
 
+        if (!in_array('admin', $token->user->permissions) && !in_array('modo', $token->user->permissions) && !in_array('user', $token->user->permissions)) {
+            $app->abort(Response::HTTP_FORBIDDEN, 'Forbidden');
+        }
+
+        $params = [];
+        $params['index'] = 'client_' . $app->escape($request->get('id_client'));
+        $params['type']  = 'user';
+        $params['body']  = [
+            'query' => [
+                'match_all' => new \stdClass()
+            ],
+            'sort' => [
+                'payments.created_at' => 'desc'
+            ],
+            'size' => 10
+        ];
+
+        $response = $app['elasticsearch.client']->search($params);
+
+        return json_encode(array_values($response['hits']['hits']), JSON_NUMERIC_CHECK);
     }
 
     public function endingMemberships(Request $request, Application $app)
