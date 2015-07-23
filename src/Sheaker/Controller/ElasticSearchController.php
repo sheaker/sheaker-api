@@ -95,6 +95,7 @@ class ElasticSearchController
                 'last_ip'          => $u->getLastIP(),
                 'failed_logins'    => $u->getFailedLogins(),
                 'created_at'       => $u->getSubscriptionDate(),
+                'user_level'       => $u->getUserLevel(),
                 'payments'         => $payments,
                 'checkins'         => $checkins
             ];
