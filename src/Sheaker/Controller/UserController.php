@@ -319,6 +319,34 @@ class UserController
                             ]
                         ]
                     ]
+                ],
+                'staff_total' => [
+                    'filter' => [
+                        'exists' => [
+                            'field' => 'user_level'
+                        ]
+                    ]
+                ],
+                'staff_user' => [
+                    'filter' => [
+                        'term' => [
+                            'user_level' => 1
+                        ]
+                    ]
+                ],
+                'staff_modo' => [
+                    'filter' => [
+                        'term' => [
+                            'user_level' => 2
+                        ]
+                    ]
+                ],
+                'staff_admin' => [
+                    'filter' => [
+                        'term' => [
+                            'user_level' => 3
+                        ]
+                    ]
                 ]
             ]
         ];
