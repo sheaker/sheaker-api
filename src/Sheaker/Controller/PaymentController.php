@@ -88,9 +88,15 @@ class PaymentController
             'size' => 10
         ];
 
-        $response = $app['elasticsearch.client']->search($params);
+        $queryResponse = $app['elasticsearch.client']->search($params);
 
-        return json_encode(array_values($response['hits']['hits']), JSON_NUMERIC_CHECK);
+        // format elasticsearch response to something more pretty
+        $response = [];
+        foreach ($queryResponse['hits']['hits'] as $qr) {
+            array_push($response, $qr['_source']);
+        }
+
+        return json_encode($response, JSON_NUMERIC_CHECK);
     }
 
     public function endingMemberships(Request $request, Application $app)
@@ -132,8 +138,14 @@ class PaymentController
             'size' => 10
         ];
 
-        $response = $app['elasticsearch.client']->search($params);
+        $queryResponse = $app['elasticsearch.client']->search($params);
 
-        return json_encode(array_values($response['hits']['hits']), JSON_NUMERIC_CHECK);
+        // format elasticsearch response to something more pretty
+        $response = [];
+        foreach ($queryResponse['hits']['hits'] as $qr) {
+            array_push($response, $qr['_source']);
+        }
+
+        return json_encode($response, JSON_NUMERIC_CHECK);
     }
 }

@@ -56,7 +56,7 @@ class ElasticSearchController
                         'price'          => $p->getPrice(),
                         'payment_method' => $p->getMethod(),
                         'comment'        => $p->getComment(),
-                        'created_at'     => $p->getPaymentDate()
+                        'created_at'     => $p->getCreatedAt()
                     ]
                 );
             }
@@ -76,6 +76,7 @@ class ElasticSearchController
                 ]
             ];
             $params['body'][] = [
+                'id'               => $u->getId(),
                 'custom_id'        => $u->getCustomId(),
                 'first_name'       => $u->getFirstName(),
                 'last_name'        => $u->getLastName(),
@@ -94,7 +95,7 @@ class ElasticSearchController
                 'last_seen'        => ($u->getLastSeen() != '0000-00-00') ? $u->getLastSeen() : null,
                 'last_ip'          => $u->getLastIP(),
                 'failed_logins'    => $u->getFailedLogins(),
-                'created_at'       => $u->getSubscriptionDate(),
+                'created_at'       => $u->getCreatedAt(),
                 'user_level'       => $u->getUserLevel(),
                 'payments'         => $payments,
                 'checkins'         => $checkins

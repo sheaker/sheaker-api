@@ -109,7 +109,13 @@ class UserController
 
         $queryResponse = $app['elasticsearch.client']->search($params);
 
-        return json_encode($queryResponse['hits']['hits'], JSON_NUMERIC_CHECK);
+        // format elasticsearch response to something more pretty
+        $response = [];
+        foreach ($queryResponse['hits']['hits'] as $qr) {
+            array_push($response, $qr['_source']);
+        }
+
+        return json_encode($response, JSON_NUMERIC_CHECK);
     }
 
     public function getUser(Request $request, Application $app, $user_id)
@@ -132,7 +138,7 @@ class UserController
         unset($queryResponse['_source']['payments']);
         unset($queryResponse['_source']['checkins']);
 
-        return json_encode($queryResponse, JSON_NUMERIC_CHECK);
+        return json_encode($queryResponse['_source'], JSON_NUMERIC_CHECK);
     }
 
     public function addUser(Request $request, Application $app)
@@ -409,9 +415,15 @@ class UserController
             'size' => 10
         ];
 
-        $response = $app['elasticsearch.client']->search($params);
+        $queryResponse = $app['elasticsearch.client']->search($params);
 
-        return json_encode($response['hits']['hits'], JSON_NUMERIC_CHECK);
+        // format elasticsearch response to something more pretty
+        $response = [];
+        foreach ($queryResponse['hits']['hits'] as $qr) {
+            array_push($response, $qr['_source']);
+        }
+
+        return json_encode($response, JSON_NUMERIC_CHECK);
     }
 
     public function incUsersBirthdays(Request $request, Application $app)
@@ -435,8 +447,14 @@ class UserController
         //    'size' => 10
         //];
 
-        $response = $app['elasticsearch.client']->search($params);
+        $queryResponse = $app['elasticsearch.client']->search($params);
 
-        return json_encode($response['hits']['hits'], JSON_NUMERIC_CHECK);
+        // format elasticsearch response to something more pretty
+        $response = [];
+        foreach ($queryResponse['hits']['hits'] as $qr) {
+            array_push($response, $qr['_source']);
+        }
+
+        return json_encode($response, JSON_NUMERIC_CHECK);
     }
 }
