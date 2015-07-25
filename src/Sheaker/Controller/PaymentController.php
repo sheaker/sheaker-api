@@ -9,22 +9,6 @@ use Symfony\Component\HttpFoundation\Response;
 
 class PaymentController
 {
-    public function getPayment(Request $request, Application $app, $payment_id)
-    {
-        $token = $app['jwt']->getDecodedToken();
-
-        if (!in_array('admin', $token->user->permissions) && !in_array('modo', $token->user->permissions) && !in_array('user', $token->user->permissions)) {
-            $app->abort(Response::HTTP_FORBIDDEN, 'Forbidden');
-        }
-
-        $payment = $app['repository.payment']->find($payment_id);
-        if (!$payment) {
-            $app->abort(Response::HTTP_NOT_FOUND, 'Payment not found');
-        }
-
-        return json_encode($payment, JSON_NUMERIC_CHECK);
-    }
-
     public function getPaymentsListByUser(Request $request, Application $app, $user_id)
     {
         $token = $app['jwt']->getDecodedToken();
@@ -33,20 +17,14 @@ class PaymentController
             $app->abort(Response::HTTP_FORBIDDEN, 'Forbidden');
         }
 
-        $getParams = [];
-        $getParams['limit']  = $app->escape($request->get('limit',  200));
-        $getParams['offset'] = $app->escape($request->get('offset', 0));
-        $getParams['sortBy'] = $app->escape($request->get('sortBy', 'created_at'));
-        $getParams['order']  = $app->escape($request->get('order',  'DESC'));
+        $params = [];
+        $params['index'] = 'client_' . $app->escape($request->get('id_client'));
+        $params['type']  = 'user';
+        $params['id']    = $user_id;
 
-        //if ($getParams['user']) {
-            $users = $app['repository.payment']->findAll($getParams['limit'], $getParams['offset'], array($getParams['sortBy'] => $getParams['order']), array('user_id' => $user_id));
-        //}
-        //else {
-        //    $users = $app['repository.payment']->findAll($getParams['limit'], $getParams['offset'], array($getParams['sortBy'] => $getParams['order']));
-        //}
+        $queryResponse = $app['elasticsearch.client']->get($params);
 
-        return json_encode(array_values($users), JSON_NUMERIC_CHECK);
+        return json_encode($queryResponse['_source']['payments'], JSON_NUMERIC_CHECK);
     }
 
     public function addPayment(Request $request, Application $app, $user_id)
@@ -59,8 +37,8 @@ class PaymentController
 
         $addParams = [];
         $addParams['days']      = $app->escape($request->get('days'));
-        $addParams['startDate'] = $app->escape($request->get('startDate'));
-        $addParams['endDate']   = $app->escape($request->get('endDate'));
+        $addParams['startDate'] = $app->escape($request->get('start_date'));
+        $addParams['endDate']   = $app->escape($request->get('end_date'));
         $addParams['price']     = $app->escape($request->get('price'));
         $addParams['method']    = $app->escape($request->get('method'));
 

@@ -36,9 +36,6 @@ $app->get('/users/stats/incbirthday', 'Sheaker\Controller\UserController::incUse
 /**
  * Payments routes
  */
-$app->get('/payments/{payment_id}',     'Sheaker\Controller\PaymentController::getPayment')
-    ->assert('payment_id', '\d+')
-    ->before($beforeCheckToken);
 //$app->delete('/payments/{payment_id}',  'Sheaker\Controller\PaymentController::deletePayment')
 //    ->assert('payment_id', '\d+')
 //    ->before($beforeCheckToken);
@@ -59,9 +56,6 @@ $app->post('/users/{user_id}/payments', 'Sheaker\Controller\PaymentController::a
 /**
  * Checkin routes
  */
-$app->get('/checkins/{checkin_id}',     'Sheaker\Controller\CheckinController::getCheckin')
-    ->assert('checkin_id', '\d+')
-    ->before($beforeCheckToken);
 //$app->delete('/checkins/{checkin_id}',  'Sheaker\Controller\CheckinController::deleteCheckin')
 //    ->assert('checkin_id', '\d+')
 //    ->before($beforeCheckToken);

@@ -139,7 +139,7 @@ class PaymentRepository implements RepositoryInterface
         $payment->setComment($paymentData['comment']);
         $payment->setPrice($paymentData['price']);
         $payment->setMethod($paymentData['method']);
-        $payment->setPaymentDate(date('c', strtotime($paymentData['created_at'])));
+        $payment->setCreatedAt(date('c', strtotime($paymentData['created_at'])));
 
         return $payment;
     }

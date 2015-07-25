@@ -89,46 +89,30 @@ class UserController
 
         $getParams = [];
         $getParams['offset'] = $app->escape($request->get('offset', 0));
-        $getParams['limit']  = $app->escape($request->get('limit',  50));
+        $getParams['limit']  = $app->escape($request->get('limit',  5));
         $getParams['sortBy'] = $app->escape($request->get('sortBy', 'created_at'));
         $getParams['order']  = $app->escape($request->get('order',  'desc'));
-
-        /*
-        $users = $app['repository.user']->findAll($getParams['limit'], $getParams['offset'], array($getParams['sortBy'] => $getParams['order']));
-
-        foreach ($users as $user) {
-            $user->setActiveMembership(array());
-            if ($user->getActiveMembershipId()) {
-                $user->setActiveMembership($app['repository.payment']->find($user->getActiveMembershipId()));
-            }
-
-            $user->setLastCheckins($app['repository.checkin']->findAll(3, 0, array('created_at' => 'DESC'), array('user_id' => $user->getId())));
-        }
-        */
 
         $params = [];
         $params['index'] = 'client_' . $app->escape($request->get('id_client'));
         $params['type']  = 'user';
-        $params['body']['from']  = $getParams['offset'];
-        $params['body']['size']  = $getParams['limit'];
-        $params['body']['query'] = [
-            'match_all' => new \stdClass()
-        ];
-        $params['body']['sort'] = [
-            [ $getParams['sortBy'] => $getParams['order'] ]
+        $params['body']  = [
+            'query' => [
+                'match_all' => new \stdClass()
+            ],
+            'sort' => [
+                [ $getParams['sortBy'] => $getParams['order'] ]
+            ],
+            'from' => $getParams['offset'],
+            'size' => $getParams['limit']
         ];
 
         $queryResponse = $app['elasticsearch.client']->search($params);
 
-        $results = [];
-        foreach ($queryResponse['hits']['hits'] as $key => $doc) {
-            array_push($results, $doc['_source']);
-        }
-
-        return json_encode(array_values($results), JSON_NUMERIC_CHECK);
+        return json_encode($queryResponse['hits']['hits'], JSON_NUMERIC_CHECK);
     }
 
-    public function getUser(Request $request, Application $app)
+    public function getUser(Request $request, Application $app, $user_id)
     {
         $token = $app['jwt']->getDecodedToken();
 
@@ -136,31 +120,19 @@ class UserController
             $app->abort(Response::HTTP_FORBIDDEN, 'Forbidden');
         }
 
-        $getParams = [];
-        $getParams['id'] = $app->escape($request->get('id'));
+        $params = [];
+        $params['index'] = 'client_' . $app->escape($request->get('id_client'));
+        $params['type']  = 'user';
+        $params['id']    = $user_id;
 
-        foreach ($getParams as $value) {
-            if (!isset($value)) {
-                $app->abort(Response::HTTP_BAD_REQUEST, 'Missing parameters');
-            }
-        }
+        $queryResponse = $app['elasticsearch.client']->get($params);
 
-        $user = $app['repository.user']->findByCustomId($getParams['id']);
-        if (!$user) {
-            $user = $app['repository.user']->findById($getParams['id']);
-            if (!$user || ($user->id && $user->customId)) {
-                $app->abort(Response::HTTP_NOT_FOUND, 'User not found');
-            }
-        }
+        // Remove unneeded array which can be huge
+        // use instead /user/{user_id}/{payments|checkins} if you really want them
+        unset($queryResponse['_source']['payments']);
+        unset($queryResponse['_source']['checkins']);
 
-        $user->setActiveMembership(array());
-        if ($user->getActiveMembershipId()) {
-            $user->setActiveMembership($app['repository.payment']->find($user->getActiveMembershipId()));
-        }
-
-        $user->setLastCheckins($app['repository.checkin']->findAll(3, 0, array('created_at' => 'DESC'), array('user_id' => $user->getId())));
-
-        return json_encode($user, JSON_NUMERIC_CHECK);
+        return json_encode($queryResponse, JSON_NUMERIC_CHECK);
     }
 
     public function addUser(Request $request, Application $app)
@@ -172,8 +144,8 @@ class UserController
         }
 
         $addParams = [];
-        $addParams['firstName']      = $app->escape($request->get('firstName'));
-        $addParams['lastName']       = $app->escape($request->get('lastName'));
+        $addParams['firstName']      = $app->escape($request->get('first_name'));
+        $addParams['lastName']       = $app->escape($request->get('last_name'));
 
         foreach ($addParams as $value) {
             if (!isset($value)) {
@@ -184,13 +156,13 @@ class UserController
         $addParams['phone']          = $app->escape($request->get('phone'));
         $addParams['mail']           = $app->escape($request->get('mail'));
         $addParams['birthdate']      = $app->escape($request->get('birthdate', '0000-00-00'));
-        $addParams['addressStreet1'] = $app->escape($request->get('addressStreet1'));
-        $addParams['addressStreet2'] = $app->escape($request->get('addressStreet2'));
+        $addParams['addressStreet1'] = $app->escape($request->get('address_street_1'));
+        $addParams['addressStreet2'] = $app->escape($request->get('address_street_2'));
         $addParams['city']           = $app->escape($request->get('city'));
         $addParams['zip']            = $app->escape($request->get('zip'));
         $addParams['gender']         = $app->escape($request->get('gender', -1));
-        $addParams['userLevel']      = $app->escape($request->get('userLevel'));
-        $addParams['customId']       = $app->escape($request->get('customId', 0));
+        $addParams['userLevel']      = $app->escape($request->get('user_level'));
+        $addParams['customId']       = $app->escape($request->get('custom_id', 0));
         $addParams['photo']          = $app->escape($request->get('photo'));
         $addParams['sponsor']        = $app->escape($request->get('sponsor', 0));
         $addParams['comment']        = $app->escape($request->get('comment'));
@@ -236,7 +208,7 @@ class UserController
         return json_encode($user, JSON_NUMERIC_CHECK);
     }
 
-    public function editUser(Request $request, Application $app)
+    public function editUser(Request $request, Application $app, $user_id)
     {
         $token = $app['jwt']->getDecodedToken();
 
@@ -245,9 +217,8 @@ class UserController
         }
 
         $editParams = [];
-        $editParams['id']             = $app->escape($request->get('id'));
-        $editParams['firstName']      = $app->escape($request->get('firstName'));
-        $editParams['lastName']       = $app->escape($request->get('lastName'));
+        $editParams['firstName']      = $app->escape($request->get('first_name'));
+        $editParams['lastName']       = $app->escape($request->get('last_name'));
 
         foreach ($editParams as $value) {
             if (!isset($value)) {
@@ -258,18 +229,18 @@ class UserController
         $editParams['phone']          = $app->escape($request->get('phone'));
         $editParams['mail']           = $app->escape($request->get('mail'));
         $editParams['birthdate']      = $app->escape($request->get('birthdate', '0000-00-00'));
-        $editParams['addressStreet1'] = $app->escape($request->get('addressStreet1'));
-        $editParams['addressStreet2'] = $app->escape($request->get('addressStreet2'));
+        $editParams['addressStreet1'] = $app->escape($request->get('address_street_1'));
+        $editParams['addressStreet2'] = $app->escape($request->get('address_street_2'));
         $editParams['city']           = $app->escape($request->get('city'));
         $editParams['zip']            = $app->escape($request->get('zip'));
         $editParams['gender']         = $app->escape($request->get('gender', -1));
-        $editParams['userLevel']      = $app->escape($request->get('userLevel'));
-        $editParams['customId']       = $app->escape($request->get('customId', 0));
+        $editParams['userLevel']      = $app->escape($request->get('user_level'));
+        $editParams['customId']       = $app->escape($request->get('custom_id', 0));
         $editParams['photo']          = $app->escape($request->get('photo'));
         $editParams['sponsor']        = $app->escape($request->get('sponsor', 0));
         $editParams['comment']        = $app->escape($request->get('comment'));
 
-        $user = $app['repository.user']->findById($editParams['id']);
+        $user = $app['repository.user']->findById($user_id);
         if (!$user) {
             $app->abort(Response::HTTP_NOT_FOUND, 'User not found');
         }
@@ -311,7 +282,7 @@ class UserController
         return json_encode($user, JSON_NUMERIC_CHECK);
     }
 
-    public function deleteUser(Request $request, Application $app)
+    public function deleteUser(Request $request, Application $app, $user_id)
     {
         $token = $app['jwt']->getDecodedToken();
 
@@ -319,16 +290,7 @@ class UserController
             $app->abort(Response::HTTP_FORBIDDEN, 'Forbidden');
         }
 
-        $deleteParams = [];
-        $deleteParams['id'] = $app->escape($request->get('id'));
-
-        foreach ($deleteParams as $value) {
-            if (!isset($value)) {
-                $app->abort(Response::HTTP_BAD_REQUEST, 'Missing parameters');
-            }
-        }
-
-        $user = $app['repository.user']->findById($deleteParams['id']);
+        $user = $app['repository.user']->findById($user_id);
         if (!$user) {
             $app->abort(Response::HTTP_NOT_FOUND, 'User not found');
         }
@@ -449,7 +411,7 @@ class UserController
 
         $response = $app['elasticsearch.client']->search($params);
 
-        return json_encode(array_values($response['hits']['hits']), JSON_NUMERIC_CHECK);
+        return json_encode($response['hits']['hits'], JSON_NUMERIC_CHECK);
     }
 
     public function incUsersBirthdays(Request $request, Application $app)
@@ -475,6 +437,6 @@ class UserController
 
         $response = $app['elasticsearch.client']->search($params);
 
-        return json_encode(array_values($response['hits']['hits']), JSON_NUMERIC_CHECK);
+        return json_encode($response['hits']['hits'], JSON_NUMERIC_CHECK);
     }
 }
