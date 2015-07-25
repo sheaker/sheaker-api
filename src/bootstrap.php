@@ -116,14 +116,14 @@ $app->before(function (Request $request, Application $app) {
         $request->request->replace(is_array($data) ? $data : array());
     }
 
-    if (strpos($request->getPathInfo(), "info") === false) {
+    if (strpos($request->getPathInfo(), 'info') === false) {
         $app['client']->fetchClient($request);
-
-        if (preg_match("/users|payments|checkin/", $request->getPathInfo())) {
-            $app['jwt']->checkTokenAuthenticity($request);
-        }
     }
 });
+
+$beforeCheckToken = function (Request $request, Application $app) {
+    $app['jwt']->checkTokenAuthenticity($request);
+};
 
 /**
  * Register after handler
