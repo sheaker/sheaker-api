@@ -303,6 +303,13 @@ class UserController
 
         $app['repository.user']->delete($user->id);
 
+        $params = [];
+        $params['index'] = 'client_' . $app->escape($request->get('id_client'));
+        $params['type']  = 'user';
+        $params['id']    = $user_id;
+
+        $app['elasticsearch.client']->delete($params);
+
         return json_encode($user, JSON_NUMERIC_CHECK);
     }
 
