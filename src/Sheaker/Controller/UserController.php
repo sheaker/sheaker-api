@@ -129,16 +129,47 @@ class UserController
         $params = [];
         $params['index'] = 'client_' . $app->escape($request->get('id_client'));
         $params['type']  = 'user';
-        $params['id']    = $user_id;
+        $params['body'] = [
+            'query' => [
+                'filtered' => [
+                    'filter' => [
+                        'term' => [
+                            'custom_id' => $user_id
+                        ]
+                    ]
+                ]
+            ]
+        ];
 
-        $queryResponse = $app['elasticsearch.client']->get($params);
+        // search first one user with this custom id...
+        $queryResponse = $app['elasticsearch.client']->search($params);
+
+        if (!isset($queryResponse['hits']['hits'][0])) {
+            $params['body'] = [
+                'query' => [
+                    'filtered' => [
+                        'filter' => [
+                            'term' => [
+                                'id' => $user_id
+                            ]
+                        ]
+                    ]
+                ]
+            ];
+
+            // ...otherwise search one user with this id
+            $queryResponse = $app['elasticsearch.client']->search($params);
+        }
+
+        // There should have only 1 user, no need to iterate
+        $response = $queryResponse['hits']['hits'][0];
 
         // Remove unneeded array which can be huge
         // use instead /user/{user_id}/{payments|checkins} if you really want them
-        unset($queryResponse['_source']['payments']);
-        unset($queryResponse['_source']['checkins']);
+        unset($response['_source']['payments']);
+        unset($response['_source']['checkins']);
 
-        return json_encode($queryResponse['_source'], JSON_NUMERIC_CHECK);
+        return json_encode($response['_source'], JSON_NUMERIC_CHECK);
     }
 
     public function addUser(Request $request, Application $app)
@@ -201,15 +232,45 @@ class UserController
         $user->setCity($addParams['city']);
         $user->setZip($addParams['zip']);
         $user->setGender($addParams['gender']);
+        $user->setPhoto($photoPath);
         $user->setSponsor($addParams['sponsor']);
-        $user->setUserLevel($addParams['userLevel']);
         $user->setComment($addParams['comment']);
+        $user->setFailedLogins(0);
         $user->setLastSeen('0000-00-00 00:00:00');
         $user->setLastIP('0.0.0.0');
         $user->setCreatedAt(date('c'));
-        $user->setFailedLogins(0);
-        $user->setPhoto($photoPath);
+        $user->setUserLevel($addParams['userLevel']);
         $app['repository.user']->save($user);
+
+        $params = [];
+        $params['index'] = 'client_' . $app->escape($request->get('id_client'));
+        $params['type']  = 'user';
+        $params['id']    = $user->getId();
+        $params['body']  = [
+            'id'               => $user->getId(),
+            'custom_id'        => $addParams['customId'],
+            'first_name'       => $addParams['firstName'],
+            'last_name'        => $addParams['lastName'],
+            'password'         => $user->getPassword(),
+            'phone'            => $addParams['phone'],
+            'mail'             => $addParams['mail'],
+            'birthdate'        => $addParams['birthdate'],
+            'address_street_1' => $addParams['addressStreet1'],
+            'address_street_2' => $addParams['addressStreet2'],
+            'city'             => $addParams['city'],
+            'zip'              => $addParams['zip'],
+            'gender'           => $addParams['gender'],
+            'photo'            => $photoPath,
+            'sponsor_id'       => $addParams['sponsor'],
+            'comment'          => $addParams['comment'],
+            'failed_logins'    => 0,
+            'last_seen'        => 'now',
+            'last_ip'          => '0.0.0.0',
+            'created_at'       => $user->getCreatedAt(),
+            'user_level'       => $addParams['userLevel']
+        ];
+
+        $app['elasticsearch.client']->index($params);
 
         return json_encode($user, JSON_NUMERIC_CHECK);
     }
@@ -309,7 +370,7 @@ class UserController
             ]
         ];
 
-        $client->update($params);
+        $app['elasticsearch.client']->update($params);
 
         return json_encode($user, JSON_NUMERIC_CHECK);
     }

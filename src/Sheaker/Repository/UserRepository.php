@@ -43,9 +43,10 @@ class UserRepository implements RepositoryInterface
             'photo'            => $user->getPhoto(),
             'sponsor_id'       => $user->getSponsor(),
             'comment'          => $user->getComment(),
+            'failed_logins'    => $user->getFailedLogins(),
             'last_seen'        => $user->getLastSeen(),
             'last_ip'          => $user->getLastIP(),
-            'failed_logins'    => $user->getFailedLogins()
+            'created_at'       => $user->getCreatedAt()
         );
 
         if ($user->getId()) {
