@@ -186,7 +186,7 @@ class UserController
             file_put_contents($photoPath, base64_decode($addParams['photo']));
         }
 
-        $generatedPassword = substr(str_shuffle("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_-=+;:,.?"), 0, 6);
+        $generatedPassword = substr(str_shuffle('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_-=+;:,.?'), 0, 6);
 
         $user = new User();
         $user->setCustomId($addParams['customId']);
@@ -232,6 +232,7 @@ class UserController
             }
         }
 
+        $editParams['customId']       = $app->escape($request->get('custom_id', 0));
         $editParams['phone']          = $app->escape($request->get('phone'));
         $editParams['mail']           = $app->escape($request->get('mail'));
         $editParams['birthdate']      = $app->escape($request->get('birthdate', '0000-00-00'));
@@ -240,11 +241,10 @@ class UserController
         $editParams['city']           = $app->escape($request->get('city'));
         $editParams['zip']            = $app->escape($request->get('zip'));
         $editParams['gender']         = $app->escape($request->get('gender', -1));
-        $editParams['userLevel']      = $app->escape($request->get('user_level'));
-        $editParams['customId']       = $app->escape($request->get('custom_id', 0));
         $editParams['photo']          = $app->escape($request->get('photo'));
         $editParams['sponsor']        = $app->escape($request->get('sponsor', 0));
         $editParams['comment']        = $app->escape($request->get('comment'));
+        $editParams['userLevel']      = $app->escape($request->get('user_level'));
 
         $user = $app['repository.user']->findById($user_id);
         if (!$user) {
@@ -279,11 +279,38 @@ class UserController
         $user->setCity($editParams['city']);
         $user->setZip($editParams['zip']);
         $user->setGender($editParams['gender']);
-        $user->setUserLevel($editParams['userLevel']);
+        $user->setPhoto($photoPath);
         $user->setSponsor($editParams['sponsor']);
         $user->setComment($editParams['comment']);
-        $user->setPhoto($photoPath);
+        $user->setUserLevel($editParams['userLevel']);
         $app['repository.user']->save($user);
+
+        $params = [];
+        $params['index'] = 'client_' . $app->escape($request->get('id_client'));
+        $params['type']  = 'user';
+        $params['id']    = $user_id;
+        $params['body']  = [
+                'doc' => [
+                    'custom_id'        => $editParams['customId'],
+                    'first_name'       => $editParams['firstName'],
+                    'last_name'        => $editParams['lastName'],
+                    'phone'            => $editParams['phone'],
+                    'mail'             => $editParams['mail'],
+                    'birthdate'        => $editParams['birthdate'],
+                    'address_street_1' => $editParams['addressStreet1'],
+                    'address_street_2' => $editParams['addressStreet2'],
+                    'city'             => $editParams['city'],
+                    'zip'              => $editParams['zip'],
+                    'gender'           => $editParams['gender'],
+                    'photo'            => $photoPath,
+                    'sponsor_id'       => $editParams['sponsor'],
+                    'comment'          => $editParams['comment'],
+                    'user_level'       => $editParams['userLevel']
+                ]
+            ]
+        ];
+
+        $client->update($params);
 
         return json_encode($user, JSON_NUMERIC_CHECK);
     }
