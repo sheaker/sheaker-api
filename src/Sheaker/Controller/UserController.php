@@ -290,23 +290,22 @@ class UserController
         $params['type']  = 'user';
         $params['id']    = $user_id;
         $params['body']  = [
-                'doc' => [
-                    'custom_id'        => $editParams['customId'],
-                    'first_name'       => $editParams['firstName'],
-                    'last_name'        => $editParams['lastName'],
-                    'phone'            => $editParams['phone'],
-                    'mail'             => $editParams['mail'],
-                    'birthdate'        => $editParams['birthdate'],
-                    'address_street_1' => $editParams['addressStreet1'],
-                    'address_street_2' => $editParams['addressStreet2'],
-                    'city'             => $editParams['city'],
-                    'zip'              => $editParams['zip'],
-                    'gender'           => $editParams['gender'],
-                    'photo'            => $photoPath,
-                    'sponsor_id'       => $editParams['sponsor'],
-                    'comment'          => $editParams['comment'],
-                    'user_level'       => $editParams['userLevel']
-                ]
+            'doc' => [
+                'custom_id'        => $editParams['customId'],
+                'first_name'       => $editParams['firstName'],
+                'last_name'        => $editParams['lastName'],
+                'phone'            => $editParams['phone'],
+                'mail'             => $editParams['mail'],
+                'birthdate'        => $editParams['birthdate'],
+                'address_street_1' => $editParams['addressStreet1'],
+                'address_street_2' => $editParams['addressStreet2'],
+                'city'             => $editParams['city'],
+                'zip'              => $editParams['zip'],
+                'gender'           => $editParams['gender'],
+                'photo'            => $photoPath,
+                'sponsor_id'       => $editParams['sponsor'],
+                'comment'          => $editParams['comment'],
+                'user_level'       => $editParams['userLevel']
             ]
         ];
 
