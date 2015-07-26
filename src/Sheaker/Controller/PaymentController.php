@@ -58,7 +58,7 @@ class PaymentController
         $payment->setComment($addParams['comment']);
         $payment->setPrice($addParams['price']);
         $payment->setMethod($addParams['method']);
-        $payment->setPaymentDate(date('c'));
+        $payment->setCreatedAt(date('c'));
         $app['repository.payment']->save($payment);
 
         return json_encode($payment, JSON_NUMERIC_CHECK);

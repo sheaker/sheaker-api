@@ -206,7 +206,7 @@ class UserController
         $user->setComment($addParams['comment']);
         $user->setLastSeen('0000-00-00 00:00:00');
         $user->setLastIP('0.0.0.0');
-        $user->setSubscriptionDate(date('c'));
+        $user->setCreatedAt(date('c'));
         $user->setFailedLogins(0);
         $user->setPhoto($photoPath);
         $app['repository.user']->save($user);
