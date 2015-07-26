@@ -90,6 +90,7 @@ class UserRepository implements RepositoryInterface
         $userData = $this->db->fetchAssoc('
             SELECT *
             FROM users u
+            LEFT JOIN users_access ua ON ua.user_id = u.id
             WHERE u.id = ?', array($id));
         return $userData ? $this->buildUser($userData) : FALSE;
     }
@@ -106,6 +107,7 @@ class UserRepository implements RepositoryInterface
         $userData = $this->db->fetchAssoc('
             SELECT *
             FROM users u
+            LEFT JOIN users_access ua ON ua.user_id = u.id
             WHERE u.custom_id = ?', array($customId));
         return $userData ? $this->buildUser($userData) : FALSE;
     }
