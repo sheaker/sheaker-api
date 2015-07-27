@@ -134,7 +134,7 @@ class PaymentController
             ],
             'sort' => [
                 'payments.end_date' => [
-                    'order' => 'desc',
+                    'order' => 'asc',
                     'nested_filter' => [
                         'range' => [
                             'payments.end_date' => [
