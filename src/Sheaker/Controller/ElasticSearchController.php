@@ -28,6 +28,10 @@ class ElasticSearchController
                 'enabled' => true
             ],
             'properties' => [
+                'birthdate' => [
+                    'type'   => 'date',
+                    'format' => 'date'
+                ],
                 'payments' => [
                     'type' => 'nested',
                 ],

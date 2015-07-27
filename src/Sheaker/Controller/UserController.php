@@ -192,7 +192,7 @@ class UserController
 
         $addParams['phone']          = $app->escape($request->get('phone'));
         $addParams['mail']           = $app->escape($request->get('mail'));
-        $addParams['birthdate']      = $app->escape($request->get('birthdate', '0000-00-00'));
+        $addParams['birthdate']      = $app->escape($request->get('birthdate'));
         $addParams['addressStreet1'] = $app->escape($request->get('address_street_1'));
         $addParams['addressStreet2'] = $app->escape($request->get('address_street_2'));
         $addParams['city']           = $app->escape($request->get('city'));
@@ -236,7 +236,7 @@ class UserController
         $user->setSponsor($addParams['sponsor']);
         $user->setComment($addParams['comment']);
         $user->setFailedLogins(0);
-        $user->setLastSeen('0000-00-00 00:00:00');
+        $user->setLastSeen('0000-00-00T00:00:00+00:00');
         $user->setLastIP('0.0.0.0');
         $user->setCreatedAt(date('c'));
         $user->setUserLevel($addParams['userLevel']);
@@ -254,7 +254,7 @@ class UserController
             'password'         => $user->getPassword(),
             'phone'            => $addParams['phone'],
             'mail'             => $addParams['mail'],
-            'birthdate'        => $addParams['birthdate'],
+            'birthdate'        => ($addParams['birthdate']) ? $addParams['birthdate'] : null,
             'address_street_1' => $addParams['addressStreet1'],
             'address_street_2' => $addParams['addressStreet2'],
             'city'             => $addParams['city'],
@@ -264,7 +264,7 @@ class UserController
             'sponsor_id'       => $addParams['sponsor'],
             'comment'          => $addParams['comment'],
             'failed_logins'    => 0,
-            'last_seen'        => 'now',
+            'last_seen'        => null,
             'last_ip'          => '0.0.0.0',
             'created_at'       => $user->getCreatedAt(),
             'user_level'       => $addParams['userLevel']
@@ -296,7 +296,7 @@ class UserController
         $editParams['customId']       = $app->escape($request->get('custom_id', 0));
         $editParams['phone']          = $app->escape($request->get('phone'));
         $editParams['mail']           = $app->escape($request->get('mail'));
-        $editParams['birthdate']      = $app->escape($request->get('birthdate', '0000-00-00'));
+        $editParams['birthdate']      = $app->escape($request->get('birthdate'));
         $editParams['addressStreet1'] = $app->escape($request->get('address_street_1'));
         $editParams['addressStreet2'] = $app->escape($request->get('address_street_2'));
         $editParams['city']           = $app->escape($request->get('city'));
@@ -357,7 +357,7 @@ class UserController
                 'last_name'        => $editParams['lastName'],
                 'phone'            => $editParams['phone'],
                 'mail'             => $editParams['mail'],
-                'birthdate'        => $editParams['birthdate'],
+                'birthdate'        => ($editParams['birthdate']) ? $editParams['birthdate'] : null,
                 'address_street_1' => $editParams['addressStreet1'],
                 'address_street_2' => $editParams['addressStreet2'],
                 'city'             => $editParams['city'],
