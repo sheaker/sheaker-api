@@ -101,8 +101,8 @@ class ElasticSearchController
                 'failed_logins'    => $u->getFailedLogins(),
                 'created_at'       => $u->getCreatedAt(),
                 'user_level'       => $u->getUserLevel(),
-                'payments'         => $payments,
-                'checkins'         => $checkins
+                'payments'         => (count($payments)) ? $payments : new \stdClass(),
+                'checkins'         => (count($checkins)) ? $checkins : new \stdClass()
             ];
         }
 

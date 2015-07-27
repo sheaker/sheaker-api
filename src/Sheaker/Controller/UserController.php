@@ -267,7 +267,9 @@ class UserController
             'last_seen'        => null,
             'last_ip'          => '0.0.0.0',
             'created_at'       => $user->getCreatedAt(),
-            'user_level'       => $addParams['userLevel']
+            'user_level'       => $addParams['userLevel'],
+            'payments'         => new \stdClass(),
+            'checkins'         => new \stdClass()
         ];
 
         $app['elasticsearch.client']->index($params);
