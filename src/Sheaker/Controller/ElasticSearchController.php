@@ -100,7 +100,7 @@ class ElasticSearchController
                 'last_ip'          => $u->getLastIP(),
                 'failed_logins'    => $u->getFailedLogins(),
                 'created_at'       => $u->getCreatedAt(),
-                'user_level'       => $u->getUserLevel(),
+                'user_level'       => ($u->getUserLevel()) ? $u->getUserLevel(): 0,
                 'payments'         => (count($payments)) ? $payments : new \stdClass(),
                 'checkins'         => (count($checkins)) ? $checkins : new \stdClass()
             ];

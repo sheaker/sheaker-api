@@ -456,8 +456,10 @@ class UserController
                 ],
                 'staff_total' => [
                     'filter' => [
-                        'exists' => [
-                            'field' => 'user_level'
+                        'range' => [
+                            'user_level' => [
+                                'gt' => 0
+                            ]
                         ]
                     ]
                 ],
