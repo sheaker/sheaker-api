@@ -133,7 +133,17 @@ class PaymentController
                 ]
             ],
             'sort' => [
-                'payments.end_date' => 'asc'
+                'payments.end_date' => [
+                    'order' => 'desc',
+                    'nested_filter' => [
+                        'range' => [
+                            'payments.end_date' => [
+                                'gte' => 'now',
+                                'lte' => 'now+3d'
+                            ]
+                        ]
+                    ]
+                ]
             ],
             'size' => 10
         ];
