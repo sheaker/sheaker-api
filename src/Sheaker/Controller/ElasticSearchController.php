@@ -17,7 +17,7 @@ class ElasticSearchController
         //}
 
         // First, delete existing index
-        $params['index'] = 'client_' . $app->escape($request->get('id_client'));
+        $params['index'] = 'client_' . $app['client.id'];
 
         if ($app['elasticsearch.client']->indices()->exists(['index' => $params['index']]))
             $app['elasticsearch.client']->indices()->delete($params);

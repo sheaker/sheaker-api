@@ -18,7 +18,7 @@ class PaymentController
         }
 
         $params = [];
-        $params['index'] = 'client_' . $app->escape($request->get('id_client'));
+        $params['index'] = 'client_' . $app['client.id'];
         $params['type']  = 'user';
         $params['id']    = $user_id;
 
@@ -62,7 +62,7 @@ class PaymentController
         $app['repository.payment']->save($payment);
 
         $params = [];
-        $params['index'] = 'client_' . $app->escape($request->get('id_client'));
+        $params['index'] = 'client_' . $app['client.id'];
         $params['type']  = 'user';
         $params['body'] = [
             'query' => [
@@ -112,7 +112,7 @@ class PaymentController
 
         // update the user payments with the new payment
         $params = [];
-        $params['index'] = 'client_' . $app->escape($request->get('id_client'));
+        $params['index'] = 'client_' . $app['client.id'];
         $params['type']  = 'user';
         $params['id']    = $user_id;
         $params['body']  = [
@@ -137,7 +137,7 @@ class PaymentController
         }
 
         $params = [];
-        $params['index'] = 'client_' . $app->escape($request->get('id_client'));
+        $params['index'] = 'client_' . $app['client.id'];
         $params['type']  = 'user';
         $params['body']  = [
             'query' => [
@@ -169,7 +169,7 @@ class PaymentController
         }
 
         $params = [];
-        $params['index'] = 'client_' . $app->escape($request->get('id_client'));
+        $params['index'] = 'client_' . $app['client.id'];
         $params['type']  = 'user';
         $params['body']  = [
             'query' => [

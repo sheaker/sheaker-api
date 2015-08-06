@@ -94,7 +94,7 @@ class UserController
         $getParams['order']  = $app->escape($request->get('order',  'desc'));
 
         $params = [];
-        $params['index'] = 'client_' . $app->escape($request->get('id_client'));
+        $params['index'] = 'client_' . $app['client.id'];
         $params['type']  = 'user';
         $params['body']  = [
             'query' => [
@@ -127,7 +127,7 @@ class UserController
         }
 
         $params = [];
-        $params['index'] = 'client_' . $app->escape($request->get('id_client'));
+        $params['index'] = 'client_' . $app['client.id'];
         $params['type']  = 'user';
         $params['body'] = [
             'query' => [
@@ -243,7 +243,7 @@ class UserController
         $app['repository.user']->save($user);
 
         $params = [];
-        $params['index'] = 'client_' . $app->escape($request->get('id_client'));
+        $params['index'] = 'client_' . $app['client.id'];
         $params['type']  = 'user';
         $params['id']    = $user->getId();
         $params['body']  = [
@@ -349,7 +349,7 @@ class UserController
         $app['repository.user']->save($user);
 
         $params = [];
-        $params['index'] = 'client_' . $app->escape($request->get('id_client'));
+        $params['index'] = 'client_' . $app['client.id'];
         $params['type']  = 'user';
         $params['id']    = $user_id;
         $params['body']  = [
@@ -393,7 +393,7 @@ class UserController
         $app['repository.user']->delete($user->id);
 
         $params = [];
-        $params['index'] = 'client_' . $app->escape($request->get('id_client'));
+        $params['index'] = 'client_' . $app['client.id'];
         $params['type']  = 'user';
         $params['id']    = $user_id;
 
@@ -414,7 +414,7 @@ class UserController
         }
 
         $params = [];
-        $params['index']       = 'client_' . $app->escape($request->get('id_client'));
+        $params['index']       = 'client_' . $app['client.id'];
         $params['type']        = 'user';
         $params['search_type'] = 'count';
         $params['body']        = [
@@ -501,7 +501,7 @@ class UserController
         }
 
         $params = [];
-        $params['index'] = 'client_' . $app->escape($request->get('id_client'));
+        $params['index'] = 'client_' . $app['client.id'];
         $params['type']  = 'user';
         $params['body']  = [
             'query' => [
@@ -533,7 +533,7 @@ class UserController
         }
 
         $params = [];
-        $params['index'] = 'client_' . $app->escape($request->get('id_client'));
+        $params['index'] = 'client_' . $app['client.id'];
         $params['type']  = 'user';
         //$params['body']  = [
         //    'query' => [

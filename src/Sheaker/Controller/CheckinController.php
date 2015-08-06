@@ -18,7 +18,7 @@ class CheckinController
         }
 
         $params = [];
-        $params['index'] = 'client_' . $app->escape($request->get('id_client'));
+        $params['index'] = 'client_' . $app['client.id'];
         $params['type']  = 'user';
         $params['id']    = $user_id;
 
@@ -41,7 +41,7 @@ class CheckinController
         $app['repository.checkin']->save($checkin);
 
         $params = [];
-        $params['index'] = 'client_' . $app->escape($request->get('id_client'));
+        $params['index'] = 'client_' . $app['client.id'];
         $params['type']  = 'user';
         $params['body'] = [
             'query' => [
@@ -85,7 +85,7 @@ class CheckinController
 
         // update the user checkins with the new checkin
         $params = [];
-        $params['index'] = 'client_' . $app->escape($request->get('id_client'));
+        $params['index'] = 'client_' . $app['client.id'];
         $params['type']  = 'user';
         $params['id']    = $user_id;
         $params['body']  = [
@@ -110,7 +110,7 @@ class CheckinController
         }
 
         $params = [];
-        $params['index'] = 'client_' . $app->escape($request->get('id_client'));
+        $params['index'] = 'client_' . $app['client.id'];
         $params['type']  = 'user';
         $params['body']  = [
             'query' => [
