@@ -40,6 +40,61 @@ class CheckinController
         $checkin->setCreatedAt(date('c'));
         $app['repository.checkin']->save($checkin);
 
+        $params = [];
+        $params['index'] = 'client_' . $app->escape($request->get('id_client'));
+        $params['type']  = 'user';
+        $params['body'] = [
+            'query' => [
+                'filtered' => [
+                    'filter' => [
+                        'term' => [
+                            'custom_id' => $user_id
+                        ]
+                    ]
+                ]
+            ]
+        ];
+
+        // search first one user with this custom id...
+        $queryResponse = $app['elasticsearch.client']->search($params);
+
+        if (!isset($queryResponse['hits']['hits'][0])) {
+            $params['body'] = [
+                'query' => [
+                    'filtered' => [
+                        'filter' => [
+                            'term' => [
+                                'id' => $user_id
+                            ]
+                        ]
+                    ]
+                ]
+            ];
+
+            // ...otherwise search one user with this id
+            $queryResponse = $app['elasticsearch.client']->search($params);
+        }
+
+        // There should have only 1 user, no need to iterate
+        $user = $queryResponse['hits']['hits'][0]['_source'];
+
+        $newCheckin = [
+            'id'             => $checkin->getId(),
+            'created_at'     => $checkin->getCreatedAt()
+        ];
+
+        // update the user checkins with the new checkin
+        $params = [];
+        $params['index'] = 'client_' . $app->escape($request->get('id_client'));
+        $params['type']  = 'user';
+        $params['id']    = $user_id;
+        $params['body']  = [
+            'doc' => [
+                'checkins' => array_push($user['checkins'], $newCheckin)
+            ]
+        ];
+        $app['elasticsearch.client']->update($params);
+
         return json_encode($checkin, JSON_NUMERIC_CHECK);
     }
 

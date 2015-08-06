@@ -61,6 +61,67 @@ class PaymentController
         $payment->setCreatedAt(date('c'));
         $app['repository.payment']->save($payment);
 
+        $params = [];
+        $params['index'] = 'client_' . $app->escape($request->get('id_client'));
+        $params['type']  = 'user';
+        $params['body'] = [
+            'query' => [
+                'filtered' => [
+                    'filter' => [
+                        'term' => [
+                            'custom_id' => $user_id
+                        ]
+                    ]
+                ]
+            ]
+        ];
+
+        // search first one user with this custom id...
+        $queryResponse = $app['elasticsearch.client']->search($params);
+
+        if (!isset($queryResponse['hits']['hits'][0])) {
+            $params['body'] = [
+                'query' => [
+                    'filtered' => [
+                        'filter' => [
+                            'term' => [
+                                'id' => $user_id
+                            ]
+                        ]
+                    ]
+                ]
+            ];
+
+            // ...otherwise search one user with this id
+            $queryResponse = $app['elasticsearch.client']->search($params);
+        }
+
+        // There should have only 1 user, no need to iterate
+        $user = $queryResponse['hits']['hits'][0]['_source'];
+
+        $newPayment = [
+            'id'             => $payment->getId(),
+            'start_date'     => $payment->getStartDate(),
+            'end_date'       => $payment->getEndDate(),
+            'days'           => $payment->getDays(),
+            'price'          => $payment->getPrice(),
+            'payment_method' => $payment->getMethod(),
+            'comment'        => $payment->getComment(),
+            'created_at'     => $payment->getCreatedAt()
+        ];
+
+        // update the user payments with the new payment
+        $params = [];
+        $params['index'] = 'client_' . $app->escape($request->get('id_client'));
+        $params['type']  = 'user';
+        $params['id']    = $user_id;
+        $params['body']  = [
+            'doc' => [
+                'payments' => array_push($user['payments'], $newPayment)
+            ]
+        ];
+        $app['elasticsearch.client']->update($params);
+
         return json_encode($payment, JSON_NUMERIC_CHECK);
     }
 
