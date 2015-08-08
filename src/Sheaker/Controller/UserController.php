@@ -112,7 +112,20 @@ class UserController
         // format elasticsearch response to something more pretty
         $response = [];
         foreach ($queryResponse['hits']['hits'] as $qr) {
-            array_push($response, $qr['_source']);
+            $user = $qr['_source'];
+
+            $user['active_membership_id'] = null;
+            foreach ($user['payments'] as $p) {
+                if (strtotime($p['start_date']) < time() && time() < strtotime($p['end_date'])) {
+                    $user['active_membership_id'] = $p['id'];
+                }
+            }
+
+            // We 'normaly' don't need theses informations here
+            unset($user['payments']);
+            unset($user['checkins']);
+
+            array_push($response, $user);
         }
 
         return json_encode($response, JSON_NUMERIC_CHECK);
@@ -162,14 +175,21 @@ class UserController
         }
 
         // There should have only 1 user, no need to iterate
-        $response = $queryResponse['hits']['hits'][0];
+        $user = $queryResponse['hits']['hits'][0]['_source'];
+
+        $user['active_membership_id'] = null;
+        foreach ($user['payments'] as $p) {
+            if (strtotime($p['start_date']) < time() && time() < strtotime($p['end_date'])) {
+                $user['active_membership_id'] = $p['id'];
+            }
+        }
 
         // Remove unneeded array which can be huge
         // use instead /user/{user_id}/{payments|checkins} if you really want them
-        unset($response['_source']['payments']);
-        unset($response['_source']['checkins']);
+        unset($user['payments']);
+        unset($user['checkins']);
 
-        return json_encode($response['_source'], JSON_NUMERIC_CHECK);
+        return json_encode($user, JSON_NUMERIC_CHECK);
     }
 
     public function addUser(Request $request, Application $app)
