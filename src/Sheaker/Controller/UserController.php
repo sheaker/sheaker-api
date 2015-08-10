@@ -131,6 +131,54 @@ class UserController
         return json_encode($response, JSON_NUMERIC_CHECK);
     }
 
+    public function getUsersSearch(Request $request, Application $app)
+    {
+        $token = $app['jwt']->getDecodedToken();
+
+        if (!in_array('admin', $token->user->permissions) && !in_array('modo', $token->user->permissions) && !in_array('user', $token->user->permissions)) {
+            $app->abort(Response::HTTP_FORBIDDEN, 'Forbidden');
+        }
+
+        $getParams = [];
+        $getParams['query'] = $app->escape($request->get('query'));
+
+        $params = [];
+        $params['index'] = 'client_' . $app['client.id'];
+        $params['type']  = 'user';
+        $params['body']  = [
+            'query' => [
+                'multi_match' => [
+                    'fields'    => ['id', 'custom_id', 'first_name', 'last_name'],
+                    'query'     => $getParams['query'],
+                    'fuzziness' => 'AUTO'
+                ]
+            ]
+        ];
+
+        $queryResponse = $app['elasticsearch.client']->search($params);
+
+        // format elasticsearch response to something more pretty
+        $response = [];
+        foreach ($queryResponse['hits']['hits'] as $qr) {
+            $user = $qr['_source'];
+
+            $user['active_membership_id'] = null;
+            foreach ($user['payments'] as $p) {
+                if (strtotime($p['start_date']) < time() && time() < strtotime($p['end_date'])) {
+                    $user['active_membership_id'] = $p['id'];
+                }
+            }
+
+            // We 'normaly' don't need theses informations here
+            unset($user['payments']);
+            unset($user['checkins']);
+
+            array_push($response, $user);
+        }
+
+        return json_encode($response, JSON_NUMERIC_CHECK);
+    }
+
     public function getUser(Request $request, Application $app, $user_id)
     {
         $token = $app['jwt']->getDecodedToken();

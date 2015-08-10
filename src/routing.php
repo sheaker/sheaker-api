@@ -14,6 +14,8 @@ $app->post('/users/renew_token',      'Sheaker\Controller\UserController::renewT
 
 $app->get('/users',                   'Sheaker\Controller\UserController::getUsersList')
     ->before($beforeCheckToken);
+$app->get('/users/search',            'Sheaker\Controller\UserController::getUsersSearch')
+    ->before($beforeCheckToken);
 $app->get('/users/{user_id}',         'Sheaker\Controller\UserController::getUser')
     ->assert('user_id', '\d+')
     ->before($beforeCheckToken);
