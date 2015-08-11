@@ -38,6 +38,9 @@ $app->get('/users/stats/incbirthday', 'Sheaker\Controller\UserController::incUse
 /**
  * Payments routes
  */
+$app->get('/payments/{payment_id}',  'Sheaker\Controller\PaymentController::getPayment')
+    ->assert('payment_id', '\d+')
+    ->before($beforeCheckToken);
 //$app->delete('/payments/{payment_id}',  'Sheaker\Controller\PaymentController::deletePayment')
 //    ->assert('payment_id', '\d+')
 //    ->before($beforeCheckToken);
