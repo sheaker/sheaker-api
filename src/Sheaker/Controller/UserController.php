@@ -32,7 +32,7 @@ class UserController
         }
 
         if (password_verify($loginParams['password'], $user->getPassword())) {
-            $user->setLastSeen(date('Y-m-d H:i:s', time()));
+            $user->setLastSeen(date('c', time()));
             $user->setLastIP($request->getClientIp());
             $user->setFailedLogins(0);
             $app['repository.user']->save($user);

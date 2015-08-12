@@ -30,8 +30,7 @@ class ClientRepository implements RepositoryInterface
         $clientData = array(
             'name'        => $client->getName(),
             'subdomain'   => $client->getSubdomain(),
-            'secret_key'  => $client->getSecretKey(),
-            'created_at'  => $client->getCreatedAt()
+            'secret_key'  => $client->getSecretKey()
         );
 
         if ($client->getId()) {
