@@ -173,6 +173,17 @@ class PaymentController
             array_push($response, $qr['_source']);
         }
 
+        foreach ($response as &$user) {
+            $user['active_membership_id'] = null;
+            foreach ($user['payments'] as $p) {
+                if (strtotime($p['start_date']) < time() && time() < strtotime($p['end_date'])) {
+                    $user['active_membership_id'] = $p['id'];
+                }
+            }
+
+            unset($user['payments']);
+        }
+
         return json_encode($response, JSON_NUMERIC_CHECK);
     }
 
