@@ -37,6 +37,8 @@ $app->get('/users/stats/incbirthday', 'Sheaker\Controller\UserController::incUse
 
 $app->get('/users/graph/new',         'Sheaker\Controller\UserController::newUsersGraph')
     ->before($beforeCheckToken);
+$app->get('/users/graph/sex',         'Sheaker\Controller\UserController::userSexGraph')
+    ->before($beforeCheckToken);
 
 /**
  * Payments routes

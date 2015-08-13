@@ -664,4 +664,48 @@ class UserController
 
         return json_encode($response, JSON_NUMERIC_CHECK);
     }
+
+    public function userSexGraph(Request $request, Application $app)
+    {
+        $token = $app['jwt']->getDecodedToken();
+
+        if (!in_array('admin', $token->user->permissions) && !in_array('modo', $token->user->permissions) && !in_array('user', $token->user->permissions)) {
+            $app->abort(Response::HTTP_FORBIDDEN, 'Forbidden');
+        }
+
+        $params = [];
+        $params['index']       = 'client_' . $app['client.id'];
+        $params['type']        = 'user';
+        $params['search_type'] = 'count';
+        $params['body']  = [
+            'aggs' => [
+                'gender_m' => [
+                    'filter' => [
+                        'term' => [
+                            'gender' => 0
+                        ]
+                    ]
+                ],
+                'gender_f' => [
+                    'filter' => [
+                        'term' => [
+                            'gender' => 1
+                        ]
+                    ]
+                ]
+            ]
+        ];
+
+        $queryResponse = $app['elasticsearch.client']->search($params);
+
+        $response = [
+            'labels' => ['Male', 'Female'],
+            'data'   => [
+                $queryResponse['aggregations']['gender_m']['doc_count'],
+                $queryResponse['aggregations']['gender_f']['doc_count']
+            ]
+        ];
+
+        return json_encode($response, JSON_NUMERIC_CHECK);
+    }
 }
