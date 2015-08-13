@@ -13,7 +13,6 @@ $app['database.passwd'] = '';
 $app['elasticsearch.config'] = [
     'hosts' => [
         'https://esa.sheaker.com:443'
-        'https://esa.sheaker.com:443'
     ],
     'connectionParams' => [
         'auth' => [
