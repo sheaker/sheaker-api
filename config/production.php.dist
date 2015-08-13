@@ -12,11 +12,18 @@ $app['database.passwd'] = '';
  */
 $app['elasticsearch.config'] = [
     'hosts' => [
-        '127.0.0.1:9200'
+        'https://esa.sheaker.com:443'
+        'https://esa.sheaker.com:443'
+    ],
+    'connectionParams' => [
+        'auth' => [
+            'elasticsheaker',
+            'H8xkV5x9',
+            'Basic'
+        ]
     ],
     'logging' => false,
-    'logPath' => __DIR__ . '/../logs/elasticsearch.log',
-    'connectionClass' => '\Elasticsearch\Connections\CurlMultiConnection'
+    'logPath' => __DIR__ . '/../logs/elasticsearch.log'
 ];
 
 /**
