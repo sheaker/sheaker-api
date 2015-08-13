@@ -125,6 +125,7 @@ class PaymentController
             'comment'        => $payment->getComment(),
             'created_at'     => $payment->getCreatedAt()
         ];
+        array_push($user['payments'], $newPayment);
 
         // update the user payments with the new payment
         $params = [];
@@ -133,7 +134,7 @@ class PaymentController
         $params['id']    = $user_id;
         $params['body']  = [
             'doc' => [
-                'payments' => array_push($user['payments'], $newPayment)
+                'payments' => $user['payments']
             ]
         ];
         $app['elasticsearch.client']->update($params);

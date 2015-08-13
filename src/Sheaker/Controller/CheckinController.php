@@ -82,6 +82,7 @@ class CheckinController
             'id'             => $checkin->getId(),
             'created_at'     => $checkin->getCreatedAt()
         ];
+        array_push($user['checkins'], $newCheckin);
 
         // update the user checkins with the new checkin
         $params = [];
@@ -90,7 +91,7 @@ class CheckinController
         $params['id']    = $user_id;
         $params['body']  = [
             'doc' => [
-                'checkins' => array_push($user['checkins'], $newCheckin)
+                'checkins' => $user['checkins']
             ]
         ];
         $app['elasticsearch.client']->update($params);
