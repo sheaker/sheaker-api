@@ -32,6 +32,7 @@ class CheckinRepository implements RepositoryInterface
         );
 
         $this->db->insert('users_checkin', $checkinData);
+        $checkin->setId($this->db->lastInsertId());
     }
 
     /**

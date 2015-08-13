@@ -38,6 +38,7 @@ class PaymentRepository implements RepositoryInterface
         );
 
         $this->db->insert('users_payments', $paymentData);
+        $payment->setId($this->db->lastInsertId());
     }
 
     /**
