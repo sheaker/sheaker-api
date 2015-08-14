@@ -222,6 +222,10 @@ class UserController
             $queryResponse = $app['elasticsearch.client']->search($params);
         }
 
+        if ($queryResponse['hits']['total'] === 0) {
+            $app->abort(Response::HTTP_NOT_FOUND, 'User not found');
+        }
+
         // There should have only 1 user, no need to iterate
         $user = $queryResponse['hits']['hits'][0]['_source'];
 
