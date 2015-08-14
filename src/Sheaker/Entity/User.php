@@ -17,21 +17,21 @@ class User
      *
      * @var integer
      */
-    public $customId;
+    public $custom_id;
 
     /**
      * First Name.
      *
      * @var string
      */
-    public $firstName;
+    public $first_name;
 
     /**
      * Last Name.
      *
      * @var string
      */
-    public $lastName;
+    public $last_name;
 
     /**
      * Password.
@@ -59,7 +59,7 @@ class User
      *
      * @var integer
      */
-    public $userLevel;
+    public $user_level;
 
     /**
      * When the user entity was born.
@@ -73,14 +73,14 @@ class User
      *
      * @var string
      */
-    public $addressStreet1;
+    public $address_street_1;
 
     /**
      * Second line Street Address.
      *
      * @var string
      */
-    public $addressStreet2;
+    public $address_street_2;
 
     /**
      * Name of the City.
@@ -129,50 +129,28 @@ class User
      *
      * @var integer
      */
-    public $failedLogins;
+    public $failed_logins;
 
     /**
      * When the user entity was last seen.
      *
      * @var string
      */
-    public $lastSeen;
+    public $last_seen;
 
     /**
      * The last IP of the user.
      *
      * @var String
      */
-    public $lastIP;
+    public $last_ip;
 
     /**
      * When the user entity was created.
      *
      * @var string
      */
-    public $subscriptionDate;
-
-    /**
-     * last user checkins.
-     *
-     * @var array
-     */
-    public $lastCheckins;
-
-    /**
-     * The active membership id.
-     *
-     * @var integer
-     */
-    public $activeMembershipId;
-
-    /**
-     * The active membership.
-     *
-     * @var \Sheaker\Entity\Payment
-     */
-    public $activeMembership;
-
+    public $created_at;
 
     public function getId()
     {
@@ -185,29 +163,29 @@ class User
 
     public function getCustomId()
     {
-        return $this->customId;
+        return $this->custom_id;
     }
     public function setCustomId($customId)
     {
-        return $this->customId = $customId;
+        return $this->custom_id = $customId;
     }
 
     public function getFirstName()
     {
-        return $this->firstName;
+        return $this->first_name;
     }
     public function setFirstName($firstName)
     {
-        $this->firstName = $firstName;
+        $this->first_name = $firstName;
     }
 
     public function getLastName()
     {
-        return $this->lastName;
+        return $this->last_name;
     }
     public function setLastName($lastName)
     {
-        $this->lastName = $lastName;
+        $this->last_name = $lastName;
     }
 
     public function getPassword()
@@ -239,11 +217,11 @@ class User
 
     public function getUserLevel()
     {
-        return $this->userLevel;
+        return $this->user_level;
     }
     public function setUserLevel($userLevel)
     {
-        $this->userLevel = $userLevel;
+        $this->user_level = $userLevel;
     }
 
     public function getBirthdate()
@@ -257,20 +235,20 @@ class User
 
     public function getAddressStreet1()
     {
-        return $this->addressStreet1;
+        return $this->address_street_1;
     }
     public function setAddressStreet1($addressStreet1)
     {
-        $this->addressStreet1 = $addressStreet1;
+        $this->address_street_1 = $addressStreet1;
     }
 
     public function getAddressStreet2()
     {
-        return $this->addressStreet2;
+        return $this->address_street_2;
     }
     public function setAddressStreet2($addressStreet2)
     {
-        $this->addressStreet2 = $addressStreet2;
+        $this->address_street_2 = $addressStreet2;
     }
 
     public function getCity()
@@ -329,64 +307,37 @@ class User
 
     public function getFailedLogins()
     {
-        return $this->failedLogins;
+        return $this->failed_logins;
     }
     public function setFailedLogins($failedLogins)
     {
-        $this->failedLogins = $failedLogins;
+        $this->failed_logins = $failedLogins;
     }
 
     public function getLastSeen()
     {
-        return $this->lastSeen;
+        return $this->last_seen;
     }
     public function setLastSeen($lastSeen)
     {
-        $this->lastSeen = $lastSeen;
+        $this->last_seen = $lastSeen;
     }
 
     public function getLastIP()
     {
-        return $this->lastIP;
+        return $this->last_ip;
     }
     public function setLastIP($lastIP)
     {
-        $this->lastIP = $lastIP;
+        $this->last_ip = $lastIP;
     }
 
-    public function getSubscriptionDate()
+    public function getCreatedAt()
     {
-        return $this->subscriptionDate;
+        return $this->created_at;
     }
-    public function setSubscriptionDate($subscriptionDate)
+    public function setCreatedAt($createdAt)
     {
-        $this->subscriptionDate = $subscriptionDate;
-    }
-
-    public function getLastCheckins()
-    {
-        return $this->lastCheckins;
-    }
-    public function setLastCheckins($lastCheckins)
-    {
-        $this->lastCheckins = $lastCheckins;
-    }
-
-    public function getActiveMembershipId()
-    {
-        return $this->activeMembershipId;
-    }
-    public function setActiveMembershipId($activeMembershipId)
-    {
-        $this->activeMembershipId = $activeMembershipId;
-    }
-
-    public function getActiveMembership()
-    {
-        return $this->activeMembership;
-    }
-    public function setActiveMembership($activeMembership)
-    {
-        $this->activeMembership = $activeMembership;
+        $this->created_at = $createdAt;
     }
 }

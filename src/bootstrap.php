@@ -7,7 +7,9 @@ use Monolog\Logger;
 use Silex\Provider\DoctrineServiceProvider;
 use Silex\Provider\MonologServiceProvider;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Elasticsearch\Client;
 
 define('APPLICATION_ENV', getenv('APPLICATION_ENV') ?: 'production');
 
@@ -39,11 +41,11 @@ $app['api.accessLevels'] = [
 /**
  * Register service providers
  */
-$idClient = isset($_GET['id_client']) ? $_GET['id_client'] : 0;
+$app['client.id'] = isset($_GET['id_client']) ? $_GET['id_client'] : 0;
 $app->register(new DoctrineServiceProvider(), [
     'dbs.options' => [
         'gym' => [
-            'dbname'   => 'client_' . $idClient,
+            'dbname'   => 'client_' . $app['client.id'],
             'host'     => $app['database.host'],
             'user'     => $app['database.user'],
             'password' => $app['database.passwd'],
@@ -66,6 +68,10 @@ $app->register(new MonologServiceProvider(), [
     'monolog.level'   => Logger::WARNING,
     'monolog.name'    => 'api'
 ]);
+
+$app['elasticsearch.client'] = function($app) {
+  return new Client($app['elasticsearch.config']);
+};
 
 /**
  * Register our custom services
@@ -110,13 +116,20 @@ $app->before(function (Request $request, Application $app) {
         $request->request->replace(is_array($data) ? $data : array());
     }
 
-    if (strpos($request->getPathInfo(), "info") === false) {
+    if (strpos($request->getPathInfo(), 'info') === false) {
         $app['client']->fetchClient($request);
-
-        if (preg_match("/users|payments|checkin/", $request->getPathInfo())) {
-            $app['jwt']->checkTokenAuthenticity($request);
-        }
     }
+});
+
+$beforeCheckToken = function (Request $request, Application $app) {
+    $app['jwt']->checkTokenAuthenticity($request);
+};
+
+/**
+ * Register after handler
+ */
+$app->after(function (Request $request, Response $response) {
+    $response->headers->set('Content-Type', 'application/json');
 });
 
 /**

@@ -43,9 +43,9 @@ class UserRepository implements RepositoryInterface
             'photo'            => $user->getPhoto(),
             'sponsor_id'       => $user->getSponsor(),
             'comment'          => $user->getComment(),
-            'last_seen'        => $user->getLastSeen(),
-            'last_ip'          => $user->getLastIP(),
-            'failed_logins'    => $user->getFailedLogins()
+            'failed_logins'    => $user->getFailedLogins(),
+            'last_seen'        => date('Y-m-d H:i:s', strtotime($user->getLastSeen())),
+            'last_ip'          => $user->getLastIP()
         );
 
         if ($user->getId()) {
@@ -88,12 +88,7 @@ class UserRepository implements RepositoryInterface
     public function findById($id)
     {
         $userData = $this->db->fetchAssoc('
-            SELECT *, (
-                SELECT id
-                FROM users_payments
-                WHERE user_id = u.id
-                AND NOW() BETWEEN start_date AND end_date LIMIT 1
-            ) AS active_membership_id
+            SELECT *
             FROM users u
             LEFT JOIN users_access ua ON ua.user_id = u.id
             WHERE u.id = ?', array($id));
@@ -110,12 +105,7 @@ class UserRepository implements RepositoryInterface
     public function findByCustomId($customId)
     {
         $userData = $this->db->fetchAssoc('
-            SELECT *, (
-                SELECT id
-                FROM users_payments
-                WHERE user_id = u.id
-                AND NOW() BETWEEN start_date AND end_date LIMIT 1
-            ) AS active_membership_id
+            SELECT *
             FROM users u
             LEFT JOIN users_access ua ON ua.user_id = u.id
             WHERE u.custom_id = ?', array($customId));
@@ -171,12 +161,6 @@ class UserRepository implements RepositoryInterface
         $queryBuilder = $this->db->createQueryBuilder();
         $queryBuilder
             ->select('*')
-            ->addSelect('(SELECT id
-                FROM users_payments
-                WHERE user_id = u.id
-                AND NOW() BETWEEN start_date AND end_date LIMIT 1
-                ) AS active_membership_id
-            ')
             ->from('users', 'u')
             ->leftJoin('u', 'users_access', 'ua', 'u.id = ua.user_id');
         if ($limit) {
@@ -235,9 +219,7 @@ class UserRepository implements RepositoryInterface
         $user->setFailedLogins($userData['failed_logins']);
         $user->setLastSeen(date('c', strtotime($userData['last_seen'])));
         $user->setLastIP($userData['last_ip']);
-        $user->setSubscriptionDate(date('c', strtotime($userData['created_at'])));
-        $user->setActiveMembershipId($userData['active_membership_id']);
-        $user->setActiveMembership(array());
+        $user->setCreatedAt(date('c', strtotime($userData['created_at'])));
         $user->setUserLevel($userData['user_level']);
 
         return $user;

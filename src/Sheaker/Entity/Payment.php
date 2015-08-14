@@ -16,7 +16,7 @@ class Payment
      *
      * @var integer
      */
-    public $userId;
+    public $user_id;
 
     /**
      * Number of days of the subscription.
@@ -30,14 +30,14 @@ class Payment
      *
      * @var string
      */
-    public $startDate;
+    public $start_date;
 
     /**
      * Last day of subscription.
      *
      * @var string
      */
-    public $endDate;
+    public $end_date;
 
     /**
      * Special Comment.
@@ -58,14 +58,14 @@ class Payment
      *
      * @var integer
      */
-    public $paymentMethod;
+    public $method;
 
     /**
      * When the user entity was created.
      *
      * @var string
      */
-    public $paymentDate;
+    public $created_at;
 
     public function getId()
     {
@@ -78,11 +78,11 @@ class Payment
 
     public function getUserId()
     {
-        return $this->userId;
+        return $this->user_id;
     }
     public function setUserId($userId)
     {
-        return $this->userId = $userId;
+        return $this->user_id = $userId;
     }
 
     public function getDays()
@@ -96,20 +96,20 @@ class Payment
 
     public function getStartDate()
     {
-        return $this->startDate;
+        return $this->start_date;
     }
     public function setStartDate($startDate)
     {
-        $this->startDate = $startDate;
+        $this->start_date = $startDate;
     }
 
     public function getEndDate()
     {
-        return $this->endDate;
+        return $this->end_date;
     }
     public function setEndDate($endDate)
     {
-        $this->endDate = $endDate;
+        $this->end_date = $endDate;
     }
 
     public function getComment()
@@ -139,12 +139,12 @@ class Payment
         $this->method = $method;
     }
 
-    public function getPaymentDate()
+    public function getCreatedAt()
     {
-        return $this->paymentDate;
+        return $this->created_at;
     }
-    public function setPaymentDate($paymentDate)
+    public function setCreatedAt($createdAt)
     {
-        $this->paymentDate = $paymentDate;
+        $this->created_at = $createdAt;
     }
 }

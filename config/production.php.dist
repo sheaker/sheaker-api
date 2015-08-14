@@ -7,4 +7,25 @@ $app['database.host']   = '127.0.0.1';
 $app['database.user']   = 'root';
 $app['database.passwd'] = '';
 
+/**
+ * Elasticsearch configuration
+ */
+$app['elasticsearch.config'] = [
+    'hosts' => [
+        'https://esa.sheaker.com:443'
+    ],
+    'connectionParams' => [
+        'auth' => [
+            'elasticsheaker',
+            'H8xkV5x9',
+            'Basic'
+        ]
+    ],
+    'logging' => false,
+    'logPath' => __DIR__ . '/../logs/elasticsearch.log'
+];
+
+/**
+ * Miscellaneous
+ */
 $app['timezone'] = 'UTC';

@@ -7,4 +7,19 @@ $app['database.host']   = '127.0.0.1';
 $app['database.user']   = 'root';
 $app['database.passwd'] = '';
 
+/**
+ * Elasticsearch configuration
+ */
+$app['elasticsearch.config'] = [
+    'hosts' => [
+        '127.0.0.1:9200'
+    ],
+    'logging' => true,
+    'logPath' => __DIR__ . '/../logs/elasticsearch.log',
+    'connectionClass' => '\Elasticsearch\Connections\CurlMultiConnection'
+];
+
+/**
+ * Miscellaneous
+ */
 $app['timezone'] = 'UTC';

@@ -9,8 +9,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class CheckinController
 {
-
-    public function getCheckinList(Request $request, Application $app)
+    public function getCheckinsListByUser(Request $request, Application $app, $user_id)
     {
         $token = $app['jwt']->getDecodedToken();
 
@@ -18,70 +17,120 @@ class CheckinController
             $app->abort(Response::HTTP_FORBIDDEN, 'Forbidden');
         }
 
-        $getParams = [];
-        $getParams['user']   = $app->escape($request->get('user'));
-        $getParams['limit']  = $app->escape($request->get('limit',  200));
-        $getParams['offset'] = $app->escape($request->get('offset', 0));
-        $getParams['sortBy'] = $app->escape($request->get('sortBy', 'created_at'));
-        $getParams['order']  = $app->escape($request->get('order',  'DESC'));
+        $params = [];
+        $params['index'] = 'client_' . $app['client.id'];
+        $params['type']  = 'user';
+        $params['id']    = $user_id;
 
-        if ($getParams['user']) {
-            $checkin = $app['repository.checkin']->findAll($getParams['limit'], $getParams['offset'], array($getParams['sortBy'] => $getParams['order']), array('user_id' => $getParams['user']));
-        }
-        else {
-            $checkin = $app['repository.checkin']->findAll($getParams['limit'], $getParams['offset'], array($getParams['sortBy'] => $getParams['order']));
-        }
+        $queryResponse = $app['elasticsearch.client']->get($params);
 
-        return json_encode(array_values($checkin), JSON_NUMERIC_CHECK);
+        return json_encode($queryResponse['_source']['checkins'], JSON_NUMERIC_CHECK);
     }
 
-    public function getCheckin(Request $request, Application $app)
+    public function addCheckin(Request $request, Application $app, $user_id)
     {
         $token = $app['jwt']->getDecodedToken();
 
         if (!in_array('admin', $token->user->permissions) && !in_array('modo', $token->user->permissions) && !in_array('user', $token->user->permissions)) {
             $app->abort(Response::HTTP_FORBIDDEN, 'Forbidden');
-        }
-
-        $getParams = [];
-        $getParams['id'] = $app->escape($request->get('id'));
-
-        foreach ($getParams as $value) {
-            if (!isset($value)) {
-                $app->abort(Response::HTTP_BAD_REQUEST, 'Missing parameters');
-            }
-        }
-
-        $checkin = $app['repository.checkin']->find($getParams['id']);
-        if (!$checkin) {
-            $app->abort(Response::HTTP_NOT_FOUND, 'Checkin not found');
-        }
-
-        return json_encode($checkin, JSON_NUMERIC_CHECK);
-    }
-
-    public function addCheckin(Request $request, Application $app)
-    {
-        $token = $app['jwt']->getDecodedToken();
-
-        if (!in_array('admin', $token->user->permissions) && !in_array('modo', $token->user->permissions) && !in_array('user', $token->user->permissions)) {
-            $app->abort(Response::HTTP_FORBIDDEN, 'Forbidden');
-        }
-
-        $addParams = [];
-        $addParams['user'] = $app->escape($request->get('user'));
-
-        foreach ($addParams as $value) {
-            if (!isset($value)) {
-                $app->abort(Response::HTTP_BAD_REQUEST, 'Missing parameters');
-            }
         }
 
         $checkin = new Checkin();
-        $checkin->setUserId($addParams['user']);
+        $checkin->setUserId($user_id);
         $checkin->setCreatedAt(date('c'));
         $app['repository.checkin']->save($checkin);
 
+        $params = [];
+        $params['index'] = 'client_' . $app['client.id'];
+        $params['type']  = 'user';
+        $params['body'] = [
+            'query' => [
+                'filtered' => [
+                    'filter' => [
+                        'term' => [
+                            'custom_id' => $user_id
+                        ]
+                    ]
+                ]
+            ]
+        ];
+
+        // search first one user with this custom id...
+        $queryResponse = $app['elasticsearch.client']->search($params);
+
+        if (!isset($queryResponse['hits']['hits'][0])) {
+            $params['body'] = [
+                'query' => [
+                    'filtered' => [
+                        'filter' => [
+                            'term' => [
+                                'id' => $user_id
+                            ]
+                        ]
+                    ]
+                ]
+            ];
+
+            // ...otherwise search one user with this id
+            $queryResponse = $app['elasticsearch.client']->search($params);
+        }
+
+        // There should have only 1 user, no need to iterate
+        $user = $queryResponse['hits']['hits'][0]['_source'];
+
+        $newCheckin = [
+            'id'             => $checkin->getId(),
+            'created_at'     => $checkin->getCreatedAt()
+        ];
+        array_push($user['checkins'], $newCheckin);
+
+        // update the user checkins with the new checkin
+        $params = [];
+        $params['index'] = 'client_' . $app['client.id'];
+        $params['type']  = 'user';
+        $params['id']    = $user_id;
+        $params['body']  = [
+            'doc' => [
+                'checkins' => $user['checkins']
+            ]
+        ];
+        $app['elasticsearch.client']->update($params);
+
         return json_encode($checkin, JSON_NUMERIC_CHECK);
+    }
+
+    /*
+     * Stats
+     */
+    public function newCheckins(Request $request, Application $app)
+    {
+        $token = $app['jwt']->getDecodedToken();
+
+        if (!in_array('admin', $token->user->permissions) && !in_array('modo', $token->user->permissions) && !in_array('user', $token->user->permissions)) {
+            $app->abort(Response::HTTP_FORBIDDEN, 'Forbidden');
+        }
+
+        $params = [];
+        $params['index'] = 'client_' . $app['client.id'];
+        $params['type']  = 'user';
+        $params['body']  = [
+            'query' => [
+                'match_all' => new \stdClass()
+            ],
+            'sort' => [
+                'checkins.created_at' => 'desc'
+            ],
+            'size' => 10
+        ];
+
+        $queryResponse = $app['elasticsearch.client']->search($params);
+
+        // format elasticsearch response to something more pretty
+        $response = [];
+        foreach ($queryResponse['hits']['hits'] as $qr) {
+            array_push($response, $qr['_source']);
+        }
+
+        return json_encode($response, JSON_NUMERIC_CHECK);
     }
 }

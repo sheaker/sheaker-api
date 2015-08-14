@@ -16,14 +16,14 @@ class Checkin
      *
      * @var integer
      */
-    public $userId;
+    public $user_id;
 
     /**
      * When the checkin entity was created.
      *
      * @var string
      */
-    public $createdAt;
+    public $created_at;
 
     public function getId()
     {
@@ -36,19 +36,19 @@ class Checkin
 
     public function getUserId()
     {
-        return $this->userId;
+        return $this->user_id;
     }
     public function setUserId($userId)
     {
-        return $this->userId = $userId;
+        return $this->user_id = $userId;
     }
 
     public function getCreatedAt()
     {
-        return $this->createdAt;
+        return $this->created_at;
     }
     public function setCreatedAt($createdAt)
     {
-        $this->createdAt = $createdAt;
+        $this->created_at = $createdAt;
     }
 }
