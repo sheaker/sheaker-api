@@ -116,7 +116,7 @@ class UserController
 
             $user['active_membership_id'] = null;
             foreach ($user['payments'] as $p) {
-                if (strtotime($p['start_date']) < time() && time() < strtotime($p['end_date'])) {
+                if (strtotime($p['start_date']) <= time() && time() <= strtotime($p['end_date'])) {
                     $user['active_membership_id'] = $p['id'];
                 }
             }
@@ -164,7 +164,7 @@ class UserController
 
             $user['active_membership_id'] = null;
             foreach ($user['payments'] as $p) {
-                if (strtotime($p['start_date']) < time() && time() < strtotime($p['end_date'])) {
+                if (strtotime($p['start_date']) <= time() && time() <= strtotime($p['end_date'])) {
                     $user['active_membership_id'] = $p['id'];
                 }
             }
@@ -227,7 +227,7 @@ class UserController
 
         $user['active_membership_id'] = null;
         foreach ($user['payments'] as $p) {
-            if (strtotime($p['start_date']) < time() && time() < strtotime($p['end_date'])) {
+            if (strtotime($p['start_date']) <= time() && time() <= strtotime($p['end_date'])) {
                 $user['active_membership_id'] = $p['id'];
             }
         }
