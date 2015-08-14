@@ -279,10 +279,11 @@ class UserController
                 mkdir($clientPhotosPath);
             }
 
-            $photoPath = $clientPhotosPath . '/' . uniqid() . '.png';
-            list($photoType, $addParams['photo']) = explode(';', $addParams['photo']);
-            list(, $addParams['photo'])           = explode(',', $addParams['photo']);
-            file_put_contents($photoPath, base64_decode($addParams['photo']));
+            $image = explode(',', $addParams['photo']);
+            if (preg_match('/\/(\w*);/', $image[0], $matches)) {
+                $photoPath = $clientPhotosPath . '/' . uniqid() . '.' . $matches[1];
+                file_put_contents($photoPath, base64_decode($image[1]));
+            }
         }
 
         $generatedPassword = substr(str_shuffle('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_-=+;:,.?'), 0, 6);
@@ -393,10 +394,11 @@ class UserController
                 mkdir($clientPhotosPath);
             }
 
-            $photoPath = $clientPhotosPath . '/' . uniqid() . '.png';
-            list($photoType, $editParams['photo']) = explode(';', $editParams['photo']);
-            list(, $editParams['photo'])           = explode(',', $editParams['photo']);
-            file_put_contents($photoPath, base64_decode($editParams['photo']));
+            $image = explode(',', $editParams['photo']);
+            if (preg_match('/\/(\w*);/', $image[0], $matches)) {
+                $photoPath = $clientPhotosPath . '/' . uniqid() . '.' . $matches[1];
+                file_put_contents($photoPath, base64_decode($image[1]));
+            }
         }
 
         $user->setCustomId($editParams['customId']);
