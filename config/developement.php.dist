@@ -3,9 +3,18 @@
 /**
  * Database Connection
  */
-$app['database.host']   = '127.0.0.1';
-$app['database.user']   = 'root';
-$app['database.passwd'] = '';
+$app['database.gym'] => [
+    'host'   => '127.0.0.1',
+    'user'   => 'root',
+    'passwd' => ''
+];
+
+$app['database.sheaker'] => [
+    'dbname' => 'sheaker',
+    'host'   => '127.0.0.1',
+    'user'   => 'root',
+    'passwd' => ''
+];
 
 /**
  * Elasticsearch configuration

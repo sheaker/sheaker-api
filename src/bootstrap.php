@@ -45,19 +45,19 @@ $app['client.id'] = isset($_GET['id_client']) ? $_GET['id_client'] : 0;
 $app->register(new DoctrineServiceProvider(), [
     'dbs.options' => [
         'gym' => [
-            'dbname'   => 'client_' . $app['client.id'],
-            'host'     => $app['database.host'],
-            'user'     => $app['database.user'],
-            'password' => $app['database.passwd'],
-            'charset'  => 'utf8',
+            'dbname'        => 'client_' . $app['client.id'],
+            'host'          => $app['database.gym']['host'],
+            'user'          => $app['database.gym']['user'],
+            'password'      => $app['database.gym']['passwd'],
+            'charset'       => 'utf8',
             'driverOptions' => array(1002 => 'SET NAMES utf8')
         ],
         'sheaker' => [
-            'dbname'   => 'sheaker',
-            'host'     => $app['database.host'],
-            'user'     => $app['database.user'],
-            'password' => $app['database.passwd'],
-            'charset'  => 'utf8',
+            'dbname'        => $app['database.sheaker']['dbname'],
+            'host'          => $app['database.sheaker']['host'],
+            'user'          => $app['database.sheaker']['user'],
+            'password'      => $app['database.sheaker']['passwd'],
+            'charset'       => 'utf8',
             'driverOptions' => array(1002 => 'SET NAMES utf8')
         ]
     ]
