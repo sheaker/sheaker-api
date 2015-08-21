@@ -28,11 +28,9 @@ $app->delete('/users/{user_id}',      'Sheaker\Controller\UserController::delete
     ->assert('user_id', '\d+')
     ->before($beforeCheckToken);
 
-$app->get('/users/stats',             'Sheaker\Controller\UsersStatisticsController::usersStats')
+$app->get('/users/stats/active',      'Sheaker\Controller\UsersStatisticsController::getActiveUsers')
     ->before($beforeCheckToken);
-$app->get('/users/stats/new',         'Sheaker\Controller\UsersStatisticsController::newUsersList')
-    ->before($beforeCheckToken);
-$app->get('/users/stats/incbirthday', 'Sheaker\Controller\UsersStatisticsController::incBirthdaysUsersList')
+$app->get('/users/stats/new',         'Sheaker\Controller\UsersStatisticsController::getNewUsersFromDate')
     ->before($beforeCheckToken);
 
 $app->get('/users/graph/new',         'Sheaker\Controller\UsersGraphicsController::newUsers')
@@ -47,9 +45,7 @@ $app->get('/payments/{payment_id}',     'Sheaker\Controller\PaymentController::g
     ->assert('payment_id', '\d+')
     ->before($beforeCheckToken);
 
-$app->get('/payments/stats/new',        'Sheaker\Controller\PaymentsStatisticsController::newMembershipsList')
-    ->before($beforeCheckToken);
-$app->get('/payments/stats/ending',     'Sheaker\Controller\PaymentsStatisticsController::endingMembershipsList')
+$app->get('/payments/stats/gains',      'Sheaker\Controller\PaymentsStatisticsController::getGainsFromDate')
     ->before($beforeCheckToken);
 
 // Payments by user
@@ -63,7 +59,7 @@ $app->post('/users/{user_id}/payments', 'Sheaker\Controller\PaymentController::a
 /**
  * Checkin routes
  */
-$app->get('/checkins/stats/new',        'Sheaker\Controller\CheckinsStatisticsController::newCheckinsList')
+$app->get('/checkins/stats/new',        'Sheaker\Controller\CheckinsStatisticsController::getCheckinsFromDate')
     ->before($beforeCheckToken);
 
 // Checkins by user

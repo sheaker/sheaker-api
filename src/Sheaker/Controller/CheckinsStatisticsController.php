@@ -8,35 +8,53 @@ use Symfony\Component\HttpFoundation\Response;
 
 class CheckinsStatisticsController
 {
-    public function newCheckinsList(Request $request, Application $app)
+    public function getCheckinsFromDate(Request $request, Application $app)
     {
         $token = $app['jwt']->getDecodedToken();
 
         if (!in_array('admin', $token->user->permissions) && !in_array('modo', $token->user->permissions) && !in_array('user', $token->user->permissions)) {
             $app->abort(Response::HTTP_FORBIDDEN, 'Forbidden');
         }
+        $getParams = [];
+        $getParams['fromDate'] = $app->escape($request->get('from_date'));
+
+        foreach ($getParams as $value) {
+            if (!isset($value)) {
+                $app->abort(Response::HTTP_BAD_REQUEST, 'Missing parameters');
+            }
+        }
+
+        $getParams['toDate'] = $app->escape($request->get('to_date', date('d/m/Y')));
 
         $params = [];
-        $params['index'] = 'client_' . $app['client.id'];
-        $params['type']  = 'user';
-        $params['body']  = [
+        $params['index']       = 'client_' . $app['client.id'];
+        $params['type']        = 'user';
+        $params['search_type'] = 'count';
+        $params['body']        = [
             'query' => [
-                'match_all' => new \stdClass()
-            ],
-            'sort' => [
-                'checkins.created_at' => 'desc'
-            ],
-            'size' => 10
+                'nested' => [
+                    'path' => 'checkins',
+                    'query' => [
+                        'bool' => [
+                            'must' => [
+                                [
+                                    'range' => [
+                                        'checkins.created_at' => [
+                                            'gte'    => $getParams['fromDate'],
+                                            'lte'    => $getParams['toDate'],
+                                            'format' => 'dd/MM/yyyy'
+                                        ]
+                                    ]
+                                ]
+                            ]
+                        ]
+                    ]
+                ]
+            ]
         ];
 
         $queryResponse = $app['elasticsearch.client']->search($params);
 
-        // format elasticsearch response to something more pretty
-        $response = [];
-        foreach ($queryResponse['hits']['hits'] as $qr) {
-            array_push($response, $qr['_source']);
-        }
-
-        return json_encode($response, JSON_NUMERIC_CHECK);
+        return json_encode($queryResponse['hits'], JSON_NUMERIC_CHECK);
     }
 }
