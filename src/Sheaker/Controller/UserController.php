@@ -95,7 +95,13 @@ class UserController
         $params['type']  = 'user';
         $params['body']  = [
             'query' => [
-                'match_all' => new \stdClass()
+                'filtered' => [
+                    'filter' => [
+                        'missing' => [
+                            'field' => 'deleted_at'
+                        ]
+                    ]
+                ]
             ],
             'sort' => [
                 [ $getParams['sortBy'] => $getParams['order'] ]
@@ -244,12 +250,12 @@ class UserController
 
         $addParams['phone']          = $app->escape($request->get('phone'));
         $addParams['mail']           = $app->escape($request->get('mail'));
-        $addParams['birthdate']      = $app->escape($request->get('birthdate', null));
+        $addParams['birthdate']      = $app->escape($request->get('birthdate'));
         $addParams['addressStreet1'] = $app->escape($request->get('address_street_1'));
         $addParams['addressStreet2'] = $app->escape($request->get('address_street_2'));
         $addParams['city']           = $app->escape($request->get('city'));
         $addParams['zip']            = $app->escape($request->get('zip'));
-        $addParams['gender']         = $app->escape($request->get('gender', null));
+        $addParams['gender']         = $app->escape($request->get('gender'));
         $addParams['photo']          = $app->escape($request->get('photo'));
         $addParams['sponsor']        = $app->escape($request->get('sponsor'));
         $addParams['comment']        = $app->escape($request->get('comment'));
@@ -277,19 +283,20 @@ class UserController
         $user->setPassword(password_hash($generatedPassword, PASSWORD_DEFAULT));
         $user->setPhone($addParams['phone']);
         $user->setMail($addParams['mail']);
-        $user->setBirthdate($addParams['birthdate']);
+        $user->setBirthdate(($addParams['birthdate']) ? $addParams['birthdate'] : null);
         $user->setAddressStreet1($addParams['addressStreet1']);
         $user->setAddressStreet2($addParams['addressStreet2']);
         $user->setCity($addParams['city']);
         $user->setZip($addParams['zip']);
-        $user->setGender($addParams['gender']);
+        $user->setGender(($addParams['gender'] != '') ? $addParams['gender'] : null);
         $user->setPhoto($photoPath);
-        $user->setSponsor($addParams['sponsor']);
+        $user->setSponsor(($addParams['sponsor']) ? $addParams['sponsor'] : null);
         $user->setComment($addParams['comment']);
         $user->setFailedLogins(0);
         $user->setLastSeen(null);
         $user->setLastIP('');
         $user->setCreatedAt(date('c'));
+        $user->setDeletedAt(null);
         $user->setUserLevel($addParams['userLevel']);
         $app['repository.user']->save($user);
 
@@ -299,25 +306,25 @@ class UserController
         $params['id']    = $user->getId();
         $params['body']  = [
             'id'               => $user->getId(),
-            'first_name'       => $addParams['firstName'],
-            'last_name'        => $addParams['lastName'],
+            'first_name'       => $user->getFirstName(),
+            'last_name'        => $user->getLastName(),
             'password'         => $user->getPassword(),
-            'phone'            => $addParams['phone'],
-            'mail'             => $addParams['mail'],
-            'birthdate'        => $addParams['birthdate'],
-            'address_street_1' => $addParams['addressStreet1'],
-            'address_street_2' => $addParams['addressStreet2'],
-            'city'             => $addParams['city'],
-            'zip'              => $addParams['zip'],
-            'gender'           => $addParams['gender'],
-            'photo'            => $photoPath,
-            'sponsor_id'       => $addParams['sponsor'],
-            'comment'          => $addParams['comment'],
+            'phone'            => $user->getPhone(),
+            'mail'             => $user->getMail(),
+            'birthdate'        => $user->getBirthdate(),
+            'address_street_1' => $user->getAddressStreet1(),
+            'address_street_2' => $user->getAddressStreet2(),
+            'city'             => $user->getCity(),
+            'zip'              => $user->getZip(),
+            'gender'           => $user->getGender(),
+            'photo'            => $user->getPhoto(),
+            'sponsor_id'       => $user->getSponsor(),
+            'comment'          => $user->getComment(),
             'failed_logins'    => $user->getFailedLogins(),
             'last_seen'        => $user->getLastSeen(),
             'last_ip'          => $user->getLastIp(),
             'created_at'       => $user->getCreatedAt(),
-            'user_level'       => $addParams['userLevel'],
+            'user_level'       => $user->getUserLevel(),
             'payments'         => new \stdClass(),
             'checkins'         => new \stdClass()
         ];
@@ -347,18 +354,18 @@ class UserController
 
         $editParams['phone']          = $app->escape($request->get('phone'));
         $editParams['mail']           = $app->escape($request->get('mail'));
-        $editParams['birthdate']      = $app->escape($request->get('birthdate', null));
+        $editParams['birthdate']      = $app->escape($request->get('birthdate'));
         $editParams['addressStreet1'] = $app->escape($request->get('address_street_1'));
         $editParams['addressStreet2'] = $app->escape($request->get('address_street_2'));
         $editParams['city']           = $app->escape($request->get('city'));
         $editParams['zip']            = $app->escape($request->get('zip'));
-        $editParams['gender']         = $app->escape($request->get('gender', null));
+        $editParams['gender']         = $app->escape($request->get('gender'));
         $editParams['photo']          = $app->escape($request->get('photo'));
         $editParams['sponsor']        = $app->escape($request->get('sponsor'));
         $editParams['comment']        = $app->escape($request->get('comment'));
         $editParams['userLevel']      = $app->escape($request->get('user_level'));
 
-        $user = $app['repository.user']->findById($user_id);
+        $user = $app['repository.user']->find($user_id);
         if (!$user) {
             $app->abort(Response::HTTP_NOT_FOUND, 'User not found');
         }
@@ -385,14 +392,14 @@ class UserController
         $user->setLastName($editParams['lastName']);
         $user->setPhone($editParams['phone']);
         $user->setMail($editParams['mail']);
-        $user->setBirthdate($editParams['birthdate']);
+        $user->setBirthdate(($editParams['birthdate']) ? $editParams['birthdate'] : null);
         $user->setAddressStreet1($editParams['addressStreet1']);
         $user->setAddressStreet2($editParams['addressStreet2']);
         $user->setCity($editParams['city']);
         $user->setZip($editParams['zip']);
-        $user->setGender($editParams['gender']);
+        $user->setGender(($editParams['gender'] != '') ? $editParams['gender'] : null);
         $user->setPhoto($photoPath);
-        $user->setSponsor($editParams['sponsor']);
+        $user->setSponsor(($editParams['sponsor']) ? $editParams['sponsor'] : null);
         $user->setComment($editParams['comment']);
         $user->setUserLevel($editParams['userLevel']);
         $app['repository.user']->save($user);
@@ -403,20 +410,20 @@ class UserController
         $params['id']    = $user_id;
         $params['body']  = [
             'doc' => [
-                'first_name'       => $editParams['firstName'],
-                'last_name'        => $editParams['lastName'],
-                'phone'            => $editParams['phone'],
-                'mail'             => $editParams['mail'],
-                'birthdate'        => $editParams['birthdate'],
-                'address_street_1' => $editParams['addressStreet1'],
-                'address_street_2' => $editParams['addressStreet2'],
-                'city'             => $editParams['city'],
-                'zip'              => $editParams['zip'],
-                'gender'           => $editParams['gender'],
-                'photo'            => $photoPath,
-                'sponsor_id'       => $editParams['sponsor'],
-                'comment'          => $editParams['comment'],
-                'user_level'       => $editParams['userLevel']
+                'first_name'       => $user->getFirstName(),
+                'last_name'        => $user->getLastName(),
+                'phone'            => $user->getPhone(),
+                'mail'             => $user->getMail(),
+                'birthdate'        => $user->getBirthdate(),
+                'address_street_1' => $user->getAddressStreet1(),
+                'address_street_2' => $user->getAddressStreet2(),
+                'city'             => $user->getCity(),
+                'zip'              => $user->getZip(),
+                'gender'           => $user->getGender(),
+                'photo'            => $user->getPhoto(),
+                'sponsor_id'       => $user->getSponsor(),
+                'comment'          => $user->getComment(),
+                'user_level'       => $user->getUserLevel()
             ]
         ];
 
@@ -473,7 +480,13 @@ class UserController
         $params['search_type'] = 'count';
         $params['body']        = [
             'query' => [
-                'match_all' => new \stdClass()
+                'filtered' => [
+                    'filter' => [
+                        'missing' => [
+                            'field' => 'deleted_at'
+                        ]
+                    ]
+                ]
             ],
             'aggs' => [
                 'total' => [
@@ -559,7 +572,13 @@ class UserController
         $params['type']  = 'user';
         $params['body']  = [
             'query' => [
-                'match_all' => new \stdClass()
+                'filtered' => [
+                    'filter' => [
+                        'missing' => [
+                            'field' => 'deleted_at'
+                        ]
+                    ]
+                ]
             ],
             'sort' => [
                 'created_at' => 'desc'

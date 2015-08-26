@@ -43,9 +43,9 @@ class UserRepository implements RepositoryInterface
             'sponsor_id'       => $user->getSponsor(),
             'comment'          => $user->getComment(),
             'failed_logins'    => $user->getFailedLogins(),
-            'last_seen'        => date('Y-m-d H:i:s', strtotime($user->getLastSeen())),
+            'last_seen'        => $user->getLastSeen(),
             'last_ip'          => $user->getLastIP(),
-            'deleted_at'       => date('Y-m-d H:i:s', strtotime($user->getDeletedAt()))
+            'deleted_at'       => $user->getDeletedAt()
         );
 
         if ($user->getId()) {
