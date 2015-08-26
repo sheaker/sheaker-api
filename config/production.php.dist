@@ -3,13 +3,13 @@
 /**
  * Database Connection
  */
-$app['database.gym'] => [
+$app['database.gym'] = [
     'host'   => '127.0.0.1',
     'user'   => 'root',
     'passwd' => ''
 ];
 
-$app['database.sheaker'] => [
+$app['database.sheaker'] = [
     'dbname' => 'sheaker',
     'host'   => '127.0.0.1',
     'user'   => 'root',

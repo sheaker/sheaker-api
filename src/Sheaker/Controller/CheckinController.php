@@ -48,32 +48,15 @@ class CheckinController
                 'filtered' => [
                     'filter' => [
                         'term' => [
-                            'custom_id' => $user_id
+                            'id' => $user_id
                         ]
                     ]
                 ]
             ]
         ];
 
-        // search first one user with this custom id...
+        // ...otherwise search one user with this id
         $queryResponse = $app['elasticsearch.client']->search($params);
-
-        if (!isset($queryResponse['hits']['hits'][0])) {
-            $params['body'] = [
-                'query' => [
-                    'filtered' => [
-                        'filter' => [
-                            'term' => [
-                                'id' => $user_id
-                            ]
-                        ]
-                    ]
-                ]
-            ];
-
-            // ...otherwise search one user with this id
-            $queryResponse = $app['elasticsearch.client']->search($params);
-        }
 
         // There should have only 1 user, no need to iterate
         $user = $queryResponse['hits']['hits'][0]['_source'];
