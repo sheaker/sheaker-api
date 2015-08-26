@@ -420,12 +420,15 @@ class UserController
                 'city'             => $user->getCity(),
                 'zip'              => $user->getZip(),
                 'gender'           => $user->getGender(),
-                'photo'            => $user->getPhoto(),
                 'sponsor_id'       => $user->getSponsor(),
                 'comment'          => $user->getComment(),
                 'user_level'       => $user->getUserLevel()
             ]
         ];
+
+        if (!empty($editParams['photo'])) {
+            $params['body']['doc']['photo'] = $photoPath;
+        }
 
         $app['elasticsearch.client']->update($params);
 
