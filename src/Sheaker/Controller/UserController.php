@@ -23,12 +23,9 @@ class UserController
 
         $loginParams['rememberMe'] = $app->escape($request->get('rememberMe'));
 
-        $user = $app['repository.user']->findByCustomId($loginParams['id']);
+        $user = $app['repository.user']->find($loginParams['id']);
         if (!$user) {
-            $user = $app['repository.user']->findById($loginParams['id']);
-            if (!$user) {
-                $app->abort(Response::HTTP_NOT_FOUND, 'User not found');
-            }
+            $app->abort(Response::HTTP_NOT_FOUND, 'User not found');
         }
 
         if (password_verify($loginParams['password'], $user->getPassword())) {
@@ -39,7 +36,7 @@ class UserController
 
             $exp = ($loginParams['rememberMe']) ? time() + 60 * 60 * 24 * 30 : time() + 60 * 60 * 24; // expire in 30 days or 24h
             $userToken = [
-                'number'      => ($user->getCustomId()) ? $user->getCustomId() : $user->getId(),
+                'number'      => $user->getId(),
                 'name'        => $user->getFirstName(),
                 'lastname'    => $user->getLastname(),
                 'permissions' => [
@@ -148,7 +145,7 @@ class UserController
         $params['body']  = [
             'query' => [
                 'multi_match' => [
-                    'fields'    => ['id', 'custom_id', 'first_name', 'last_name'],
+                    'fields'    => ['id', 'first_name', 'last_name'],
                     'query'     => $getParams['query'],
                     'fuzziness' => 'AUTO'
                 ]
@@ -195,32 +192,15 @@ class UserController
                 'filtered' => [
                     'filter' => [
                         'term' => [
-                            'custom_id' => $user_id
+                            'id' => $user_id
                         ]
                     ]
                 ]
             ]
         ];
 
-        // search first one user with this custom id...
+        // ...otherwise search one user with this id
         $queryResponse = $app['elasticsearch.client']->search($params);
-
-        if (!isset($queryResponse['hits']['hits'][0])) {
-            $params['body'] = [
-                'query' => [
-                    'filtered' => [
-                        'filter' => [
-                            'term' => [
-                                'id' => $user_id
-                            ]
-                        ]
-                    ]
-                ]
-            ];
-
-            // ...otherwise search one user with this id
-            $queryResponse = $app['elasticsearch.client']->search($params);
-        }
 
         if ($queryResponse['hits']['total'] === 0) {
             $app->abort(Response::HTTP_NOT_FOUND, 'User not found');
@@ -264,17 +244,16 @@ class UserController
 
         $addParams['phone']          = $app->escape($request->get('phone'));
         $addParams['mail']           = $app->escape($request->get('mail'));
-        $addParams['birthdate']      = $app->escape($request->get('birthdate'));
+        $addParams['birthdate']      = $app->escape($request->get('birthdate', null));
         $addParams['addressStreet1'] = $app->escape($request->get('address_street_1'));
         $addParams['addressStreet2'] = $app->escape($request->get('address_street_2'));
         $addParams['city']           = $app->escape($request->get('city'));
         $addParams['zip']            = $app->escape($request->get('zip'));
-        $addParams['gender']         = $app->escape($request->get('gender', -1));
-        $addParams['userLevel']      = $app->escape($request->get('user_level'));
-        $addParams['customId']       = $app->escape($request->get('custom_id', 0));
+        $addParams['gender']         = $app->escape($request->get('gender', null));
         $addParams['photo']          = $app->escape($request->get('photo'));
-        $addParams['sponsor']        = $app->escape($request->get('sponsor', 0));
+        $addParams['sponsor']        = $app->escape($request->get('sponsor'));
         $addParams['comment']        = $app->escape($request->get('comment'));
+        $addParams['userLevel']      = $app->escape($request->get('user_level'));
 
         $photoPath = '';
         if (!empty($addParams['photo'])) {
@@ -293,7 +272,6 @@ class UserController
         $generatedPassword = substr(str_shuffle('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_-=+;:,.?'), 0, 6);
 
         $user = new User();
-        $user->setCustomId($addParams['customId']);
         $user->setFirstName($addParams['firstName']);
         $user->setLastName($addParams['lastName']);
         $user->setPassword(password_hash($generatedPassword, PASSWORD_DEFAULT));
@@ -309,8 +287,8 @@ class UserController
         $user->setSponsor($addParams['sponsor']);
         $user->setComment($addParams['comment']);
         $user->setFailedLogins(0);
-        $user->setLastSeen('0000-00-00T00:00:00+00:00');
-        $user->setLastIP('0.0.0.0');
+        $user->setLastSeen(null);
+        $user->setLastIP('');
         $user->setCreatedAt(date('c'));
         $user->setUserLevel($addParams['userLevel']);
         $app['repository.user']->save($user);
@@ -321,13 +299,12 @@ class UserController
         $params['id']    = $user->getId();
         $params['body']  = [
             'id'               => $user->getId(),
-            'custom_id'        => $addParams['customId'],
             'first_name'       => $addParams['firstName'],
             'last_name'        => $addParams['lastName'],
             'password'         => $user->getPassword(),
             'phone'            => $addParams['phone'],
             'mail'             => $addParams['mail'],
-            'birthdate'        => ($addParams['birthdate']) ? $addParams['birthdate'] : null,
+            'birthdate'        => $addParams['birthdate'],
             'address_street_1' => $addParams['addressStreet1'],
             'address_street_2' => $addParams['addressStreet2'],
             'city'             => $addParams['city'],
@@ -336,9 +313,9 @@ class UserController
             'photo'            => $photoPath,
             'sponsor_id'       => $addParams['sponsor'],
             'comment'          => $addParams['comment'],
-            'failed_logins'    => 0,
-            'last_seen'        => null,
-            'last_ip'          => '0.0.0.0',
+            'failed_logins'    => $user->getFailedLogins(),
+            'last_seen'        => $user->getLastSeen(),
+            'last_ip'          => $user->getLastIp(),
             'created_at'       => $user->getCreatedAt(),
             'user_level'       => $addParams['userLevel'],
             'payments'         => new \stdClass(),
@@ -368,17 +345,16 @@ class UserController
             }
         }
 
-        $editParams['customId']       = $app->escape($request->get('custom_id', 0));
         $editParams['phone']          = $app->escape($request->get('phone'));
         $editParams['mail']           = $app->escape($request->get('mail'));
-        $editParams['birthdate']      = $app->escape($request->get('birthdate'));
+        $editParams['birthdate']      = $app->escape($request->get('birthdate', null));
         $editParams['addressStreet1'] = $app->escape($request->get('address_street_1'));
         $editParams['addressStreet2'] = $app->escape($request->get('address_street_2'));
         $editParams['city']           = $app->escape($request->get('city'));
         $editParams['zip']            = $app->escape($request->get('zip'));
-        $editParams['gender']         = $app->escape($request->get('gender', -1));
+        $editParams['gender']         = $app->escape($request->get('gender', null));
         $editParams['photo']          = $app->escape($request->get('photo'));
-        $editParams['sponsor']        = $app->escape($request->get('sponsor', 0));
+        $editParams['sponsor']        = $app->escape($request->get('sponsor'));
         $editParams['comment']        = $app->escape($request->get('comment'));
         $editParams['userLevel']      = $app->escape($request->get('user_level'));
 
@@ -405,7 +381,6 @@ class UserController
             }
         }
 
-        $user->setCustomId($editParams['customId']);
         $user->setFirstName($editParams['firstName']);
         $user->setLastName($editParams['lastName']);
         $user->setPhone($editParams['phone']);
@@ -428,12 +403,11 @@ class UserController
         $params['id']    = $user_id;
         $params['body']  = [
             'doc' => [
-                'custom_id'        => $editParams['customId'],
                 'first_name'       => $editParams['firstName'],
                 'last_name'        => $editParams['lastName'],
                 'phone'            => $editParams['phone'],
                 'mail'             => $editParams['mail'],
-                'birthdate'        => ($editParams['birthdate']) ? $editParams['birthdate'] : null,
+                'birthdate'        => $editParams['birthdate'],
                 'address_street_1' => $editParams['addressStreet1'],
                 'address_street_2' => $editParams['addressStreet2'],
                 'city'             => $editParams['city'],
@@ -459,19 +433,25 @@ class UserController
             $app->abort(Response::HTTP_FORBIDDEN, 'Forbidden');
         }
 
-        $user = $app['repository.user']->findById($user_id);
+        $user = $app['repository.user']->find($user_id);
         if (!$user) {
             $app->abort(Response::HTTP_NOT_FOUND, 'User not found');
         }
 
-        $app['repository.user']->delete($user->id);
+        $user->setDeletedAt(date('c', time()));
+        $app['repository.user']->save($user);
 
         $params = [];
         $params['index'] = 'client_' . $app['client.id'];
         $params['type']  = 'user';
         $params['id']    = $user_id;
+        $params['body']  = [
+            'doc' => [
+                'deleted_at' => $user->getDeletedAt()
+            ]
+        ];
 
-        $app['elasticsearch.client']->delete($params);
+        $app['elasticsearch.client']->update($params);
 
         return json_encode($user, JSON_NUMERIC_CHECK);
     }

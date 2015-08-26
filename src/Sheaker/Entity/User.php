@@ -12,14 +12,6 @@ class User
     public $id;
 
     /**
-     * User custom id to log in gym.
-     * Could be differente if user want a custom identification
-     *
-     * @var integer
-     */
-    public $custom_id;
-
-    /**
      * First Name.
      *
      * @var string
@@ -152,6 +144,13 @@ class User
      */
     public $created_at;
 
+    /**
+     * When the user entity was deleted.
+     *
+     * @var string
+     */
+    public $deleted_at;
+
     public function getId()
     {
         return $this->id;
@@ -159,15 +158,6 @@ class User
     public function setId($id)
     {
         return $this->id = $id;
-    }
-
-    public function getCustomId()
-    {
-        return $this->custom_id;
-    }
-    public function setCustomId($customId)
-    {
-        return $this->custom_id = $customId;
     }
 
     public function getFirstName()
@@ -339,5 +329,14 @@ class User
     public function setCreatedAt($createdAt)
     {
         $this->created_at = $createdAt;
+    }
+
+    public function getDeletedAt()
+    {
+        return $this->deleted_at;
+    }
+    public function setDeletedAt($deletedAt)
+    {
+        $this->deleted_at = $deletedAt;
     }
 }

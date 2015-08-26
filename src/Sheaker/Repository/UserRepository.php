@@ -28,7 +28,6 @@ class UserRepository implements RepositoryInterface
     public function save($user)
     {
         $userData = array(
-            'custom_id'        => $user->getCustomId(),
             'first_name'       => $user->getFirstName(),
             'last_name'        => $user->getLastName(),
             'password'         => $user->getPassword(),
@@ -45,7 +44,8 @@ class UserRepository implements RepositoryInterface
             'comment'          => $user->getComment(),
             'failed_logins'    => $user->getFailedLogins(),
             'last_seen'        => date('Y-m-d H:i:s', strtotime($user->getLastSeen())),
-            'last_ip'          => $user->getLastIP()
+            'last_ip'          => $user->getLastIP(),
+            'deleted_at'       => date('Y-m-d H:i:s', strtotime($user->getDeletedAt()))
         );
 
         if ($user->getId()) {
@@ -74,41 +74,11 @@ class UserRepository implements RepositoryInterface
      */
     public function find($id)
     {
-        // Use findById()
-    }
-
-    /**
-     * Returns a user matching the supplied id.
-     * The id is most use db side
-     *
-     * @param integer $id
-     *
-     * @return \Sheaker\Entity\User|false An entity object if found, false otherwise.
-     */
-    public function findById($id)
-    {
         $userData = $this->db->fetchAssoc('
             SELECT *
             FROM users u
             LEFT JOIN users_access ua ON ua.user_id = u.id
             WHERE u.id = ?', array($id));
-        return $userData ? $this->buildUser($userData) : FALSE;
-    }
-
-    /**
-     * Returns a user matching the supplied custom Id.
-     *
-     * @param integer $customId
-     *
-     * @return \Sheaker\Entity\User|false An entity object if found, false otherwise.
-     */
-    public function findByCustomId($customId)
-    {
-        $userData = $this->db->fetchAssoc('
-            SELECT *
-            FROM users u
-            LEFT JOIN users_access ua ON ua.user_id = u.id
-            WHERE u.custom_id = ?', array($customId));
         return $userData ? $this->buildUser($userData) : FALSE;
     }
 
@@ -201,26 +171,26 @@ class UserRepository implements RepositoryInterface
     {
         $user = new User();
         $user->setId($userData['id']);
-        $user->setCustomId($userData['custom_id']);
         $user->setFirstName($userData['first_name']);
         $user->setLastName($userData['last_name']);
         $user->setPassword($userData['password']);
         $user->setPhone($userData['phone']);
         $user->setMail($userData['mail']);
-        $user->setBirthdate($userData['birthdate']);
+        $user->setBirthdate(($userData['birthdate']) ? $userData['birthdate'] : null);
         $user->setAddressStreet1($userData['address_street_1']);
         $user->setAddressStreet2($userData['address_street_2']);
         $user->setCity($userData['city']);
         $user->setZip($userData['zip']);
         $user->setGender($userData['gender']);
         $user->setPhoto($userData['photo']);
-        $user->setSponsor($userData['sponsor_id']);
+        $user->setSponsor((string)$userData['sponsor_id']);
         $user->setComment($userData['comment']);
         $user->setFailedLogins($userData['failed_logins']);
-        $user->setLastSeen(date('c', strtotime($userData['last_seen'])));
+        $user->setLastSeen(($userData['last_seen']) ? date('c', strtotime($userData['last_seen'])) : null);
         $user->setLastIP($userData['last_ip']);
         $user->setCreatedAt(date('c', strtotime($userData['created_at'])));
-        $user->setUserLevel($userData['user_level']);
+        $user->setDeletedAt(($userData['deleted_at']) ? date('c', strtotime($userData['deleted_at'])) : null);
+        $user->setUserLevel(($userData['user_level']) ? $userData['user_level'] : '0');
 
         return $user;
     }

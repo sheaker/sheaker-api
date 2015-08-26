@@ -79,15 +79,15 @@ class ElasticSearchController
                     '_id' => $u->getId()
                 ]
             ];
+
             $params['body'][] = [
-                'id'               => $u->getId(),
-                'custom_id'        => $u->getCustomId(),
+                'id'               => (int)$u->getId(),
                 'first_name'       => $u->getFirstName(),
                 'last_name'        => $u->getLastName(),
                 'password'         => $u->getPassword(),
                 'phone'            => $u->getphone(),
                 'mail'             => $u->getMail(),
-                'birthdate'        => ($u->getBirthdate() != '0000-00-00') ? $u->getBirthdate() : null,
+                'birthdate'        => $u->getBirthdate(),
                 'address_street_1' => $u->getAddressStreet1(),
                 'address_street_2' => $u->getAddressStreet2(),
                 'city'             => $u->getCity(),
@@ -96,11 +96,12 @@ class ElasticSearchController
                 'photo'            => $u->getPhoto(),
                 'sponsor_id'       => $u->getSponsor(),
                 'comment'          => $u->getComment(),
-                'last_seen'        => ($u->getLastSeen() != '0000-00-00') ? $u->getLastSeen() : null,
+                'last_seen'        => $u->getLastSeen(),
                 'last_ip'          => $u->getLastIP(),
                 'failed_logins'    => $u->getFailedLogins(),
                 'created_at'       => $u->getCreatedAt(),
-                'user_level'       => ($u->getUserLevel()) ? $u->getUserLevel(): 0,
+                'deleted_at'       => $u->getDeletedAt(),
+                'user_level'       => $u->getUserLevel(),
                 'payments'         => (count($payments)) ? $payments : new \stdClass(),
                 'checkins'         => (count($checkins)) ? $checkins : new \stdClass()
             ];

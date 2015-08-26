@@ -19,7 +19,7 @@ class MainController
             }
         }
 
-        return json_encode($app['client']->getClient());
+        return json_encode($app['client']->getClient(), JSON_NUMERIC_CHECK);
     }
 
     public function getSheakerInfos(Request $request, Application $app)
