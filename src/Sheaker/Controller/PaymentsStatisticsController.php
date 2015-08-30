@@ -53,14 +53,27 @@ class PaymentsStatisticsController
                 ]
             ],
             'aggs' => [
-                'gains_from_date' => [
+                'payments' => [
                     'nested' => [
                         'path' => 'payments'
                     ],
                     'aggs' => [
-                        'total' => [
-                            'sum' => [
-                                'field' => 'payments.price'
+                        'gains_from_date' => [
+                            'filter' => [
+                                'range' => [
+                                    'payments.created_at' => [
+                                        'gte'    => $getParams['fromDate'],
+                                        'lte'    => $getParams['toDate'],
+                                        'format' => 'dd/MM/yyyy'
+                                    ]
+                                ]
+                            ],
+                            'aggs' => [
+                                'total' => [
+                                    'sum' => [
+                                        'field' => 'payments.price'
+                                    ]
+                                ]
                             ]
                         ]
                     ]
@@ -70,6 +83,6 @@ class PaymentsStatisticsController
 
         $queryResponse = $app['elasticsearch.client']->search($params);
 
-        return json_encode($queryResponse['aggregations']['gains_from_date'], JSON_NUMERIC_CHECK);
+        return json_encode($queryResponse['aggregations']['payments']['gains_from_date'], JSON_NUMERIC_CHECK);
     }
 }
