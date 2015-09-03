@@ -24,7 +24,7 @@ class CheckinsStatisticsController
             }
         }
 
-        $getParams['toDate'] = $app->escape($request->get('to_date', date('d/m/Y')));
+        $getParams['toDate'] = $app->escape($request->get('to_date', date('c')));
 
         $params = [];
         $params['index']       = 'client_' . $app['client.id'];
@@ -41,8 +41,7 @@ class CheckinsStatisticsController
                                     'range' => [
                                         'checkins.created_at' => [
                                             'gte'    => $getParams['fromDate'],
-                                            'lte'    => $getParams['toDate'],
-                                            'format' => 'dd/MM/yyyy'
+                                            'lte'    => $getParams['toDate']
                                         ]
                                     ]
                                 ]

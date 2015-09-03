@@ -33,7 +33,7 @@ class ElasticSearchController
                     'format' => 'date'
                 ],
                 'payments' => [
-                    'type' => 'nested',
+                    'type' => 'nested'
                 ],
                 'checkins' => [
                     'type' => 'nested'
