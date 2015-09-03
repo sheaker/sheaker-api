@@ -62,6 +62,9 @@ $app->post('/users/{user_id}/payments', 'Sheaker\Controller\PaymentController::a
 $app->get('/checkins/stats/new',        'Sheaker\Controller\CheckinsStatisticsController::getCheckinsFromDate')
     ->before($beforeCheckToken);
 
+$app->get('/checkins/graph/new',        'Sheaker\Controller\CheckinsGraphicsController::newCheckinsFromDate')
+    ->before($beforeCheckToken);
+
 // Checkins by user
 $app->get('/users/{user_id}/checkins',  'Sheaker\Controller\CheckinController::getCheckinsListByUser')
     ->assert('user_id', '\d+')
