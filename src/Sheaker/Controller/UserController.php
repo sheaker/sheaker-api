@@ -151,7 +151,7 @@ class UserController
         $params['body']  = [
             'query' => [
                 'multi_match' => [
-                    'fields'    => ['first_name', 'last_name'],
+                    'fields'    => ['id', 'first_name', 'last_name'],
                     'query'     => $getParams['query'],
                     'fuzziness' => 'AUTO'
                 ]
