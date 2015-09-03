@@ -32,25 +32,6 @@ class PaymentsStatisticsController
         $params['type']        = 'user';
         $params['search_type'] = 'count';
         $params['body']        = [
-            'query' => [
-                'nested' => [
-                    'path' => 'payments',
-                    'query' => [
-                        'bool' => [
-                            'must' => [
-                                [
-                                    'range' => [
-                                        'payments.created_at' => [
-                                            'gte'    => $getParams['fromDate'],
-                                            'lte'    => $getParams['toDate']
-                                        ]
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
-            ],
             'aggs' => [
                 'payments' => [
                     'nested' => [
