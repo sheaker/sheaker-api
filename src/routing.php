@@ -33,9 +33,9 @@ $app->get('/users/stats/active',      'Sheaker\Controller\UsersStatisticsControl
 $app->get('/users/stats/new',         'Sheaker\Controller\UsersStatisticsController::getNewUsersFromDate')
     ->before($beforeCheckToken);
 
-$app->get('/users/graph/new',         'Sheaker\Controller\UsersGraphicsController::newUsers')
+$app->get('/users/graph/new',         'Sheaker\Controller\UsersGraphicsController::getNewUsersFromDate')
     ->before($beforeCheckToken);
-$app->get('/users/graph/sex',         'Sheaker\Controller\UsersGraphicsController::genderRepartition')
+$app->get('/users/graph/sex',         'Sheaker\Controller\UsersGraphicsController::getGenderRepartition')
     ->before($beforeCheckToken);
 
 /**
@@ -62,7 +62,7 @@ $app->post('/users/{user_id}/payments', 'Sheaker\Controller\PaymentController::a
 $app->get('/checkins/stats/new',        'Sheaker\Controller\CheckinsStatisticsController::getCheckinsFromDate')
     ->before($beforeCheckToken);
 
-$app->get('/checkins/graph/new',        'Sheaker\Controller\CheckinsGraphicsController::newCheckinsFromDate')
+$app->get('/checkins/graph/new',        'Sheaker\Controller\CheckinsGraphicsController::getCheckinsFromDate')
     ->before($beforeCheckToken);
 
 // Checkins by user

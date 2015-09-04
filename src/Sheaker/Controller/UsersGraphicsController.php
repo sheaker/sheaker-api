@@ -8,7 +8,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class UsersGraphicsController
 {
-    public function newUsers(Request $request, Application $app)
+    public function getNewUsersFromDate(Request $request, Application $app)
     {
         $token = $app['jwt']->getDecodedToken();
 
@@ -49,7 +49,7 @@ class UsersGraphicsController
         return json_encode($response, JSON_NUMERIC_CHECK);
     }
 
-    public function genderRepartition(Request $request, Application $app)
+    public function getGenderRepartition(Request $request, Application $app)
     {
         $token = $app['jwt']->getDecodedToken();
 

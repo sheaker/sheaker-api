@@ -8,7 +8,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class CheckinsGraphicsController
 {
-    public function newCheckinsFromDate(Request $request, Application $app)
+    public function getCheckinsFromDate(Request $request, Application $app)
     {
         $token = $app['jwt']->getDecodedToken();
 
