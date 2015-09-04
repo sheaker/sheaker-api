@@ -48,6 +48,9 @@ $app->get('/payments/{payment_id}',     'Sheaker\Controller\PaymentController::g
 $app->get('/payments/stats/gains',      'Sheaker\Controller\PaymentsStatisticsController::getGainsFromDate')
     ->before($beforeCheckToken);
 
+$app->get('/payments/graph/gains',      'Sheaker\Controller\PaymentsGraphicsController::getGains')
+    ->before($beforeCheckToken);
+
 // Payments by user
 $app->get('/users/{user_id}/payments',  'Sheaker\Controller\PaymentController::getPaymentsListByUser')
     ->assert('user_id', '\d+')
