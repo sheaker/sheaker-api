@@ -16,23 +16,48 @@ class UsersGraphicsController
             $app->abort(Response::HTTP_FORBIDDEN, 'Forbidden');
         }
 
+        $getParams = [];
+        $getParams['interval'] = $app->escape($request->get('interval', 'month'));
+        $getParams['fromDate'] = $app->escape($request->get('from_date'));
+
+        $aggs = [
+            'from_date' => [
+                'filter' => [
+                    'range' => [
+                        'created_at' => [
+                            'gte' => $getParams['fromDate']
+                        ]
+                    ]
+                ]
+            ],
+            'new_users_over_time' => [
+               'date_histogram' => [
+                   'field'    => 'created_at',
+                   'interval' => $getParams['interval'],
+                   'format'   => 'YYYY-MM-dd'
+                ]
+            ]
+        ];
+
         $params = [];
         $params['index']       = 'client_' . $app['client.id'];
         $params['type']        = 'user';
         $params['search_type'] = 'count';
         $params['body']  = [
-            'aggs' => [
-                'new_users_over_time' => [
-                   'date_histogram' => [
-                       'field'    => 'created_at',
-                       'interval' => 'month',
-                       'format'   => 'YYYY-MM-dd'
-                    ]
-                ]
+            'aggs' => ($getParams['fromDate']) ? [
+                'from_date' => array_merge(
+                    $aggs['from_date'], [
+                        'aggs' => [
+                            'new_users_over_time' => $aggs['new_users_over_time'],
+                        ]
+                    ])
+            ] : [
+                'new_users_over_time' => $aggs['new_users_over_time'],
             ]
         ];
 
         $queryResponse = $app['elasticsearch.client']->search($params);
+        $queryResponse = ($getParams['fromDate']) ? $queryResponse['aggregations']['from_date']['new_users_over_time'] : $queryResponse['aggregations']['new_users_over_time'];
 
         $response = [
             'labels' => [],
@@ -40,7 +65,7 @@ class UsersGraphicsController
         ];
 
         $data = [];
-        foreach ($queryResponse['aggregations']['new_users_over_time']['buckets'] as $bucket) {
+        foreach ($queryResponse['buckets'] as $bucket) {
             array_push($response['labels'], $bucket['key_as_string']);
             array_push($data, $bucket['doc_count']);
         }
