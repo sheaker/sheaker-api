@@ -37,7 +37,7 @@ class CheckinController
 
         $checkin = new Checkin();
         $checkin->setUserId($user_id);
-        $checkin->setCreatedAt(date('c'));
+        $checkin->setCreatedAt(date('Y-m-d H:i:s'));
         $app['repository.checkin']->save($checkin);
 
         $params = [];
@@ -63,7 +63,7 @@ class CheckinController
 
         $newCheckin = [
             'id'             => $checkin->getId(),
-            'created_at'     => $checkin->getCreatedAt()
+            'created_at'     => date('c', strtotime($checkin->getCreatedAt()))
         ];
         array_push($user['checkins'], $newCheckin);
 

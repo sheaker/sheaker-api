@@ -29,7 +29,7 @@ class UserController
         }
 
         if (password_verify($loginParams['password'], $user->getPassword())) {
-            $user->setLastSeen(date('c', time()));
+            $user->setLastSeen(date('Y-m-d H:i:s'));
             $user->setLastIP($request->getClientIp());
             $user->setFailedLogins(0);
             $app['repository.user']->save($user);
@@ -295,7 +295,7 @@ class UserController
         $user->setFailedLogins(0);
         $user->setLastSeen(null);
         $user->setLastIP('');
-        $user->setCreatedAt(date('c'));
+        $user->setCreatedAt(date('Y-m-d H:i:s'));
         $user->setDeletedAt(null);
         $user->setUserLevel($addParams['userLevel']);
         $app['repository.user']->save($user);
@@ -323,7 +323,7 @@ class UserController
             'failed_logins'    => $user->getFailedLogins(),
             'last_seen'        => $user->getLastSeen(),
             'last_ip'          => $user->getLastIp(),
-            'created_at'       => $user->getCreatedAt(),
+            'created_at'       => date('c', strtotime($user->getCreatedAt())),
             'user_level'       => $user->getUserLevel(),
             'payments'         => new \stdClass(),
             'checkins'         => new \stdClass()
@@ -448,7 +448,7 @@ class UserController
             $app->abort(Response::HTTP_NOT_FOUND, 'User not found');
         }
 
-        $user->setDeletedAt(date('c', time()));
+        $user->setDeletedAt(date('Y-m-d H:i:s'));
         $app['repository.user']->save($user);
 
         $params = [];
@@ -457,7 +457,7 @@ class UserController
         $params['id']    = $user_id;
         $params['body']  = [
             'doc' => [
-                'deleted_at' => $user->getDeletedAt()
+                'deleted_at' => date('c', strtotime($user->getDeletedAt()))
             ]
         ];
 

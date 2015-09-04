@@ -69,12 +69,12 @@ class PaymentController
         $payment = new Payment();
         $payment->setUserId($user_id);
         $payment->setDays($addParams['days']);
-        $payment->setStartDate(date('c', strtotime($addParams['startDate'])));
-        $payment->setEndDate(date('c', strtotime($addParams['endDate'])));
+        $payment->setStartDate(date('Y-m-d H:i:s', strtotime($addParams['startDate'])));
+        $payment->setEndDate(date('Y-m-d H:i:s', strtotime($addParams['endDate'])));
         $payment->setComment($addParams['comment']);
         $payment->setPrice($addParams['price']);
         $payment->setMethod($addParams['method']);
-        $payment->setCreatedAt(date('c'));
+        $payment->setCreatedAt(date('Y-m-d H:i:s'));
         $app['repository.payment']->save($payment);
 
         $params = [];
@@ -100,13 +100,13 @@ class PaymentController
 
         $newPayment = [
             'id'             => $payment->getId(),
-            'start_date'     => $payment->getStartDate(),
-            'end_date'       => $payment->getEndDate(),
+            'start_date'     => date('c', strtotime($payment->getStartDate())),
+            'end_date'       => date('c', strtotime($payment->getEndDate())),
             'days'           => $payment->getDays(),
             'price'          => $payment->getPrice(),
             'payment_method' => $payment->getMethod(),
             'comment'        => $payment->getComment(),
-            'created_at'     => $payment->getCreatedAt()
+            'created_at'     => date('c', strtotime($payment->getCreatedAt()))
         ];
         array_push($user['payments'], $newPayment);
 
