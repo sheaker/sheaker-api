@@ -1,0 +1,10 @@
+image: rebot/drone-php
+script:
+    - composer install --no-dev --no-interaction
+    - composer dump-autoload --optimize
+notify:
+  slack:
+    webhook_url: 'https://hooks.slack.com/services/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'
+    on_started: false
+    on_success: true
+    on_failure: true
