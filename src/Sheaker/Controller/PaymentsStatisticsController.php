@@ -12,7 +12,7 @@ class PaymentsStatisticsController
     {
         $token = $app['jwt']->getDecodedToken();
 
-        if (!in_array('admin', $token->user->permissions) && !in_array('modo', $token->user->permissions) && !in_array('user', $token->user->permissions)) {
+        if (!in_array('admin', $token->user->permissions)) {
             $app->abort(Response::HTTP_FORBIDDEN, 'Forbidden');
         }
 
