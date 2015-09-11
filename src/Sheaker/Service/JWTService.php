@@ -5,6 +5,7 @@ namespace Sheaker\Service;
 use Silex\Application;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use \Firebase\JWT\JWT;
 
 /**
  * Provides a way to handle JWT a bit more properly
@@ -15,6 +16,8 @@ class JWTService
      * @var Application
      */
     protected $app;
+
+    protected $client;
 
     protected $decodedToken;
 
@@ -31,14 +34,20 @@ class JWTService
             $this->app->abort(Response::HTTP_UNAUTHORIZED, 'No client specified');
         }
 
+        $rand_val = substr(str_shuffle('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'), 0, 6);
+
         $payload = [
             'iss' => $request->getClientIp(),
-            'iat' => time(),
+            'sub' => '',
+            'aud' => 'http://sheaker.com',
             'exp' => $exp,
+            'nbf' => time(),
+            'iat' => time(),
+            'jti' => hash('sha256', time() . $rand_val),
             'user' => $user
         ];
 
-        $token = \JWT::encode($payload, $this->client->secretKey);
+        $token = JWT::encode($payload, $this->client->secretKey);
 
         return $token;
     }
@@ -54,13 +63,11 @@ class JWTService
         // $authorizationHeader should be in that form: "Bearer {THE_TOKEN}"
         $token = explode(' ', $authorizationHeader)[1];
         try {
-            $decoded_token = \JWT::decode($token, $this->client->secretKey);
+            $this->decodedToken = JWT::decode($token, $this->client->secretKey, array('HS256'));
         }
         catch (UnexpectedValueException $ex) {
             $this->app->abort(Response::HTTP_UNAUTHORIZED, 'Invalid token');
         }
-
-        $this->decodedToken = $decoded_token;
     }
 
     public function getDecodedToken()
