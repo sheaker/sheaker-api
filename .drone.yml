@@ -6,7 +6,7 @@ script:
 
 deploy:
   ssh:
-    target: ubuntu@ec2-52-20-239-124.compute-1.amazonaws.com:/tmp/sheaker-back
+    target: ubuntu@ec2-52-20-239-124.compute-1.amazonaws.com:/tmp/sheaker-back.tar.gz
     artifacts:
       - GITARCHIVE
     cmd: .deploy/remote.sh
