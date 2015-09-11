@@ -19,6 +19,11 @@ class MainController
             }
         }
 
+        $client = $app['client']->getClient();
+
+        /// SECURITY: Don't send the secret key, it's only needed here
+        unset($client->secretKey);
+
         return json_encode($app['client']->getClient(), JSON_NUMERIC_CHECK);
     }
 
