@@ -16,3 +16,5 @@ cd current/public
 ln -s ../../photos photos
 
 #sudo /etc/init.d/nginx start
+
+rm -rf $TEMP_DIR
