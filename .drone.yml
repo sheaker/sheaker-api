@@ -8,7 +8,8 @@ deploy:
   ssh:
     target: ubuntu@ec2-52-20-239-124.compute-1.amazonaws.com:/tmp/sheaker-back
     cmd: .deploy/remote.sh
-    branch: master
+    when:
+      branch: master
 
 notify:
   slack:
