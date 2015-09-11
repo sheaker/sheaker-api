@@ -1,9 +1,6 @@
-TEMP_FILE=/tmp/sheaker-back.tgz
 TEMP_DIR=/tmp/sheaker-back
 PROD_DIR=/var/www/sheaker.com/sheaker-back
 PROD_NAME=$(date +%s)
-
-tar -zxf $TEMP_FILE
 
 #sudo /etc/init.d/nginx stop
 

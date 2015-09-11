@@ -9,7 +9,7 @@ deploy:
     target: ubuntu@ec2-52-20-239-124.compute-1.amazonaws.com:/tmp/sheaker-back.tar.gz
     artifacts:
       - GITARCHIVE
-    cmd: pwd; .deploy/remote.sh
+    cmd: cd /tmp; tar -zxf sheaker-back.tar.gz; cd sheaker-back; .deploy/remote.sh
     when:
       branch: master
 
