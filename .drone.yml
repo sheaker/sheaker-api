@@ -16,7 +16,7 @@ deploy:
       - vendor
       - composer.json
       - composer.lock
-    cmd: tar -xf sheaker-back.tar; cd sheaker-back; .deploy/remote.sh
+    cmd: mkdir sheaker-back; tar -xf sheaker-back.tar -C sheaker-back; cd sheaker-back; .deploy/remote.sh
     when:
       branch: master
 
