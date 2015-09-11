@@ -19,7 +19,12 @@ class MainController
             }
         }
 
-        return json_encode($app['client']->getClient(), JSON_NUMERIC_CHECK);
+        $client = clone $app['client']->getClient();
+
+        /// SECURITY: Don't send the secret key, it's only needed here
+        unset($client->secretKey);
+
+        return json_encode($client, JSON_NUMERIC_CHECK);
     }
 
     public function getSheakerInfos(Request $request, Application $app)

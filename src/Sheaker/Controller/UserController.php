@@ -29,7 +29,7 @@ class UserController
         }
 
         if (password_verify($loginParams['password'], $user->getPassword())) {
-            $user->setLastSeen(date('c', time()));
+            $user->setLastSeen(date('Y-m-d H:i:s'));
             $user->setLastIP($request->getClientIp());
             $user->setFailedLogins(0);
             $app['repository.user']->save($user);
@@ -151,7 +151,7 @@ class UserController
         $params['body']  = [
             'query' => [
                 'multi_match' => [
-                    'fields'    => ['first_name', 'last_name'],
+                    'fields'    => ['id', 'first_name', 'last_name'],
                     'query'     => $getParams['query'],
                     'fuzziness' => 'AUTO'
                 ]
@@ -295,7 +295,7 @@ class UserController
         $user->setFailedLogins(0);
         $user->setLastSeen(null);
         $user->setLastIP('');
-        $user->setCreatedAt(date('c'));
+        $user->setCreatedAt(date('Y-m-d H:i:s'));
         $user->setDeletedAt(null);
         $user->setUserLevel($addParams['userLevel']);
         $app['repository.user']->save($user);
@@ -323,7 +323,7 @@ class UserController
             'failed_logins'    => $user->getFailedLogins(),
             'last_seen'        => $user->getLastSeen(),
             'last_ip'          => $user->getLastIp(),
-            'created_at'       => $user->getCreatedAt(),
+            'created_at'       => date('c', strtotime($user->getCreatedAt())),
             'user_level'       => $user->getUserLevel(),
             'payments'         => new \stdClass(),
             'checkins'         => new \stdClass()
@@ -448,7 +448,7 @@ class UserController
             $app->abort(Response::HTTP_NOT_FOUND, 'User not found');
         }
 
-        $user->setDeletedAt(date('c', time()));
+        $user->setDeletedAt(date('Y-m-d H:i:s'));
         $app['repository.user']->save($user);
 
         $params = [];
@@ -457,263 +457,12 @@ class UserController
         $params['id']    = $user_id;
         $params['body']  = [
             'doc' => [
-                'deleted_at' => $user->getDeletedAt()
+                'deleted_at' => date('c', strtotime($user->getDeletedAt()))
             ]
         ];
 
         $app['elasticsearch.client']->update($params);
 
         return json_encode($user, JSON_NUMERIC_CHECK);
-    }
-
-    /*
-     * Stats
-     */
-    public function statsUsers(Request $request, Application $app)
-    {
-        $token = $app['jwt']->getDecodedToken();
-
-        if (!in_array('admin', $token->user->permissions) && !in_array('modo', $token->user->permissions) && !in_array('user', $token->user->permissions)) {
-            $app->abort(Response::HTTP_FORBIDDEN, 'Forbidden');
-        }
-
-        $params = [];
-        $params['index']       = 'client_' . $app['client.id'];
-        $params['type']        = 'user';
-        $params['search_type'] = 'count';
-        $params['body']        = [
-            'query' => [
-                'filtered' => [
-                    'filter' => [
-                        'missing' => [
-                            'field' => 'deleted_at'
-                        ]
-                    ]
-                ]
-            ],
-            'aggs' => [
-                'total' => [
-                    'value_count' => [
-                        'field' => '_uid'
-                    ]
-                ],
-                'active_memberships' => [
-                    'filter' => [
-                        'nested' => [
-                            'path'   =>'payments',
-                            'filter' => [
-                                'bool' => [
-                                    'must' => [
-                                        [
-                                            'range' => [
-                                                'payments.start_date' => [
-                                                    'lte' => 'now'
-                                                ]
-                                            ]
-                                        ],
-                                        [
-                                            'range' => [
-                                                'payments.end_date' => [
-                                                    'gte' => 'now'
-                                                ]
-                                            ]
-                                        ]
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ]
-                ],
-                'staff_total' => [
-                    'filter' => [
-                        'range' => [
-                            'user_level' => [
-                                'gt' => 0
-                            ]
-                        ]
-                    ]
-                ],
-                'staff_user' => [
-                    'filter' => [
-                        'term' => [
-                            'user_level' => 1
-                        ]
-                    ]
-                ],
-                'staff_modo' => [
-                    'filter' => [
-                        'term' => [
-                            'user_level' => 2
-                        ]
-                    ]
-                ],
-                'staff_admin' => [
-                    'filter' => [
-                        'term' => [
-                            'user_level' => 3
-                        ]
-                    ]
-                ]
-            ]
-        ];
-
-        $response = $app['elasticsearch.client']->search($params);
-
-        return json_encode($response['aggregations'], JSON_NUMERIC_CHECK);
-    }
-
-    public function newUsers(Request $request, Application $app)
-    {
-        $token = $app['jwt']->getDecodedToken();
-
-        if (!in_array('admin', $token->user->permissions) && !in_array('modo', $token->user->permissions) && !in_array('user', $token->user->permissions)) {
-            $app->abort(Response::HTTP_FORBIDDEN, 'Forbidden');
-        }
-
-        $params = [];
-        $params['index'] = 'client_' . $app['client.id'];
-        $params['type']  = 'user';
-        $params['body']  = [
-            'query' => [
-                'filtered' => [
-                    'filter' => [
-                        'missing' => [
-                            'field' => 'deleted_at'
-                        ]
-                    ]
-                ]
-            ],
-            'sort' => [
-                'created_at' => 'desc'
-            ],
-            'size' => 10
-        ];
-
-        $queryResponse = $app['elasticsearch.client']->search($params);
-
-        // format elasticsearch response to something more pretty
-        $response = [];
-        foreach ($queryResponse['hits']['hits'] as $qr) {
-            array_push($response, $qr['_source']);
-        }
-
-        return json_encode($response, JSON_NUMERIC_CHECK);
-    }
-
-    public function incUsersBirthdays(Request $request, Application $app)
-    {
-        $token = $app['jwt']->getDecodedToken();
-
-        if (!in_array('admin', $token->user->permissions) && !in_array('modo', $token->user->permissions) && !in_array('user', $token->user->permissions)) {
-            $app->abort(Response::HTTP_FORBIDDEN, 'Forbidden');
-        }
-
-        $params = [];
-        $params['index'] = 'client_' . $app['client.id'];
-        $params['type']  = 'user';
-        //$params['body']  = [
-        //    'query' => [
-        //        'match_all' => new \stdClass()
-        //    ],
-        //    'sort' => [
-        //        'birthdate' => 'desc'
-        //    ],
-        //    'size' => 10
-        //];
-
-        $queryResponse = $app['elasticsearch.client']->search($params);
-
-        // format elasticsearch response to something more pretty
-        $response = [];
-        foreach ($queryResponse['hits']['hits'] as $qr) {
-            array_push($response, $qr['_source']);
-        }
-
-        return json_encode($response, JSON_NUMERIC_CHECK);
-    }
-
-    public function newUsersGraph(Request $request, Application $app)
-    {
-        $token = $app['jwt']->getDecodedToken();
-
-        if (!in_array('admin', $token->user->permissions) && !in_array('modo', $token->user->permissions) && !in_array('user', $token->user->permissions)) {
-            $app->abort(Response::HTTP_FORBIDDEN, 'Forbidden');
-        }
-
-        $params = [];
-        $params['index']       = 'client_' . $app['client.id'];
-        $params['type']        = 'user';
-        $params['search_type'] = 'count';
-        $params['body']  = [
-            'aggs' => [
-                'new_users_over_time' => [
-                   'date_histogram' => [
-                       'field'    => 'created_at',
-                       'interval' => 'month',
-                       'format'   => 'YYYY-MM-dd'
-                    ]
-                ]
-            ]
-        ];
-
-        $queryResponse = $app['elasticsearch.client']->search($params);
-
-        $response = [
-            'labels' => [],
-            'data'   => []
-        ];
-
-        $data = [];
-        foreach ($queryResponse['aggregations']['new_users_over_time']['buckets'] as $bucket) {
-            array_push($response['labels'], $bucket['key_as_string']);
-            array_push($data, $bucket['doc_count']);
-        }
-        array_push($response['data'], $data);
-
-        return json_encode($response, JSON_NUMERIC_CHECK);
-    }
-
-    public function userSexGraph(Request $request, Application $app)
-    {
-        $token = $app['jwt']->getDecodedToken();
-
-        if (!in_array('admin', $token->user->permissions) && !in_array('modo', $token->user->permissions) && !in_array('user', $token->user->permissions)) {
-            $app->abort(Response::HTTP_FORBIDDEN, 'Forbidden');
-        }
-
-        $params = [];
-        $params['index']       = 'client_' . $app['client.id'];
-        $params['type']        = 'user';
-        $params['search_type'] = 'count';
-        $params['body']  = [
-            'aggs' => [
-                'gender_m' => [
-                    'filter' => [
-                        'term' => [
-                            'gender' => 0
-                        ]
-                    ]
-                ],
-                'gender_f' => [
-                    'filter' => [
-                        'term' => [
-                            'gender' => 1
-                        ]
-                    ]
-                ]
-            ]
-        ];
-
-        $queryResponse = $app['elasticsearch.client']->search($params);
-
-        $response = [
-            'labels' => ['Male', 'Female'],
-            'data'   => [
-                $queryResponse['aggregations']['gender_m']['doc_count'],
-                $queryResponse['aggregations']['gender_f']['doc_count']
-            ]
-        ];
-
-        return json_encode($response, JSON_NUMERIC_CHECK);
     }
 }

@@ -33,7 +33,7 @@ class ElasticSearchController
                     'format' => 'date'
                 ],
                 'payments' => [
-                    'type' => 'nested',
+                    'type' => 'nested'
                 ],
                 'checkins' => [
                     'type' => 'nested'
@@ -53,11 +53,11 @@ class ElasticSearchController
             $payments = [];
             foreach ($app['repository.payment']->findAll(0, 0, ['created_at' => 'asc'], ['user_id' => $u->getId()]) as $p) {
                 array_push($payments, [
-                        'id'             => $p->getId(),
+                        'id'             => (int)$p->getId(),
                         'start_date'     => $p->getStartDate(),
                         'end_date'       => $p->getEndDate(),
-                        'days'           => $p->getDays(),
-                        'price'          => $p->getPrice(),
+                        'days'           => (int)$p->getDays(),
+                        'price'          => (int)$p->getPrice(),
                         'payment_method' => $p->getMethod(),
                         'comment'        => $p->getComment(),
                         'created_at'     => $p->getCreatedAt()
@@ -68,7 +68,7 @@ class ElasticSearchController
             $checkins = [];
             foreach ($app['repository.checkin']->findAll(0, 0, ['created_at' => 'asc'], ['user_id' => $u->getId()]) as $ci) {
                 array_push($checkins, [
-                        'id'         => $ci->getId(),
+                        'id'         => (int)$ci->getId(),
                         'created_at' => $ci->getCreatedAt()
                     ]
                 );
@@ -76,7 +76,7 @@ class ElasticSearchController
 
             $params['body'][] = [
                 'index' => [
-                    '_id' => $u->getId()
+                    '_id' => (int)$u->getId()
                 ]
             ];
 
@@ -98,7 +98,7 @@ class ElasticSearchController
                 'comment'          => $u->getComment(),
                 'last_seen'        => $u->getLastSeen(),
                 'last_ip'          => $u->getLastIP(),
-                'failed_logins'    => $u->getFailedLogins(),
+                'failed_logins'    => (int)$u->getFailedLogins(),
                 'created_at'       => $u->getCreatedAt(),
                 'deleted_at'       => $u->getDeletedAt(),
                 'user_level'       => $u->getUserLevel(),

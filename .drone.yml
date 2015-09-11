@@ -1,0 +1,21 @@
+image: rebot/drone-php
+
+script:
+  - composer install --no-dev --no-interaction
+  - composer dump-autoload --optimize
+
+deploy:
+  ssh:
+    target: ubuntu@ec2-52-20-239-124.compute-1.amazonaws.com:/tmp/sheaker-back
+    artifacts:
+      - GITARCHIVE
+    cmd: .deploy/remote.sh
+    when:
+      branch: master
+
+notify:
+  slack:
+    webhook_url: 'https://hooks.slack.com/services/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'
+    on_started: false
+    on_success: true
+    on_failure: true

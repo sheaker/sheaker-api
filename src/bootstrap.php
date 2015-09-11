@@ -9,7 +9,7 @@ use Silex\Provider\MonologServiceProvider;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Elasticsearch\Client;
+use Elasticsearch\ClientBuilder;
 
 define('APPLICATION_ENV', getenv('APPLICATION_ENV') ?: 'production');
 
@@ -70,7 +70,10 @@ $app->register(new MonologServiceProvider(), [
 ]);
 
 $app['elasticsearch.client'] = function($app) {
-  return new Client($app['elasticsearch.config']);
+    return ClientBuilder::create()
+                        ->setHosts($app['elasticsearch.config']['hosts'])
+                        ->setLogger(ClientBuilder::defaultLogger($app['elasticsearch.config']['logPath']))
+                        ->build();
 };
 
 /**

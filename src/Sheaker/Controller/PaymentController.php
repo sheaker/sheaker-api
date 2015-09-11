@@ -69,12 +69,12 @@ class PaymentController
         $payment = new Payment();
         $payment->setUserId($user_id);
         $payment->setDays($addParams['days']);
-        $payment->setStartDate(date('c', strtotime($addParams['startDate'])));
-        $payment->setEndDate(date('c', strtotime($addParams['endDate'])));
+        $payment->setStartDate(date('Y-m-d H:i:s', strtotime($addParams['startDate'])));
+        $payment->setEndDate(date('Y-m-d H:i:s', strtotime($addParams['endDate'])));
         $payment->setComment($addParams['comment']);
         $payment->setPrice($addParams['price']);
         $payment->setMethod($addParams['method']);
-        $payment->setCreatedAt(date('c'));
+        $payment->setCreatedAt(date('Y-m-d H:i:s'));
         $app['repository.payment']->save($payment);
 
         $params = [];
@@ -100,13 +100,13 @@ class PaymentController
 
         $newPayment = [
             'id'             => $payment->getId(),
-            'start_date'     => $payment->getStartDate(),
-            'end_date'       => $payment->getEndDate(),
+            'start_date'     => date('c', strtotime($payment->getStartDate())),
+            'end_date'       => date('c', strtotime($payment->getEndDate())),
             'days'           => $payment->getDays(),
             'price'          => $payment->getPrice(),
             'payment_method' => $payment->getMethod(),
             'comment'        => $payment->getComment(),
-            'created_at'     => $payment->getCreatedAt()
+            'created_at'     => date('c', strtotime($payment->getCreatedAt()))
         ];
         array_push($user['payments'], $newPayment);
 
@@ -123,111 +123,5 @@ class PaymentController
         $app['elasticsearch.client']->update($params);
 
         return json_encode($payment, JSON_NUMERIC_CHECK);
-    }
-
-    /*
-     * Stats
-     */
-    public function newMemberships(Request $request, Application $app)
-    {
-        $token = $app['jwt']->getDecodedToken();
-
-        if (!in_array('admin', $token->user->permissions) && !in_array('modo', $token->user->permissions) && !in_array('user', $token->user->permissions)) {
-            $app->abort(Response::HTTP_FORBIDDEN, 'Forbidden');
-        }
-
-        $params = [];
-        $params['index'] = 'client_' . $app['client.id'];
-        $params['type']  = 'user';
-        $params['body']  = [
-            'query' => [
-                'match_all' => new \stdClass()
-            ],
-            'sort' => [
-                'payments.created_at' => 'desc'
-            ],
-            'size' => 10
-        ];
-
-        $queryResponse = $app['elasticsearch.client']->search($params);
-
-        // format elasticsearch response to something more pretty
-        $response = [];
-        foreach ($queryResponse['hits']['hits'] as $qr) {
-            array_push($response, $qr['_source']);
-        }
-
-        foreach ($response as &$user) {
-            $user['active_membership_id'] = null;
-            foreach ($user['payments'] as $p) {
-                if (strtotime($p['start_date']) < time() && time() < strtotime($p['end_date'])) {
-                    $user['active_membership_id'] = $p['id'];
-                }
-            }
-
-            unset($user['payments']);
-        }
-
-        return json_encode($response, JSON_NUMERIC_CHECK);
-    }
-
-    public function endingMemberships(Request $request, Application $app)
-    {
-        $token = $app['jwt']->getDecodedToken();
-
-        if (!in_array('admin', $token->user->permissions) && !in_array('modo', $token->user->permissions) && !in_array('user', $token->user->permissions)) {
-            $app->abort(Response::HTTP_FORBIDDEN, 'Forbidden');
-        }
-
-        $params = [];
-        $params['index'] = 'client_' . $app['client.id'];
-        $params['type']  = 'user';
-        $params['body']  = [
-            'query' => [
-                'bool' => [
-                    'must' => [
-                        'nested' => [
-                            'path'   =>'payments',
-                            'query' => [
-                                'bool' => [
-                                    'must' => [
-                                        'range' => [
-                                            'payments.end_date' => [
-                                                'gte' => 'now',
-                                                'lte' => 'now+3d'
-                                            ]
-                                        ]
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
-            ],
-            'sort' => [
-                'payments.end_date' => [
-                    'order' => 'asc',
-                    'nested_filter' => [
-                        'range' => [
-                            'payments.end_date' => [
-                                'gte' => 'now',
-                                'lte' => 'now+3d'
-                            ]
-                        ]
-                    ]
-                ]
-            ],
-            'size' => 10
-        ];
-
-        $queryResponse = $app['elasticsearch.client']->search($params);
-
-        // format elasticsearch response to something more pretty
-        $response = [];
-        foreach ($queryResponse['hits']['hits'] as $qr) {
-            array_push($response, $qr['_source']);
-        }
-
-        return json_encode($response, JSON_NUMERIC_CHECK);
     }
 }

@@ -30,7 +30,6 @@ $app['elasticsearch.config'] = [
             'Basic'
         ]
     ],
-    'logging' => false,
     'logPath' => __DIR__ . '/../logs/elasticsearch.log'
 ];
 
