@@ -1,4 +1,4 @@
-image: tuxity/docker-php5-composer
+image: tuxity/drone-php5-composer
 
 script:
   - composer install --no-dev --no-interaction
