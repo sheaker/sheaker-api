@@ -1,15 +1,21 @@
-image: rebot/drone-php
+image: tuxity/drone-php5-composer
 
 script:
-  - composer install --no-dev --no-interaction
-  - composer dump-autoload --optimize
+  - composer install --no-interaction --no-dev --no-progress --optimize-autoloader
 
 deploy:
   ssh:
-    target: ubuntu@ec2-52-20-239-124.compute-1.amazonaws.com:/tmp/sheaker-back.tar.gz
+    target: ubuntu@ec2-52-20-239-124.compute-1.amazonaws.com:~/sheaker-back.tar
     artifacts:
-      - GITARCHIVE
-    cmd: cd /tmp; tar -zxf sheaker-back.tar.gz; cd sheaker-back; .deploy/remote.sh
+      - .deploy
+      - config
+      - public/index.php
+      - sql
+      - src
+      - vendor
+      - composer.json
+      - composer.lock
+    cmd: mkdir sheaker-back; tar -xf sheaker-back.tar -C sheaker-back; cd sheaker-back; .deploy/remote.sh
     when:
       branch: master
 
