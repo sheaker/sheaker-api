@@ -21,14 +21,7 @@ $app['database.sheaker'] = [
  */
 $app['elasticsearch.config'] = [
     'hosts' => [
-        'https://esa.sheaker.com:443'
-    ],
-    'connectionParams' => [
-        'auth' => [
-            'elasticsheaker',
-            'H8xkV5x9',
-            'Basic'
-        ]
+        'https://USER:PASS@esa.sheaker.com:9200'
     ],
     'logPath' => __DIR__ . '/../logs/elasticsearch.log'
 ];
