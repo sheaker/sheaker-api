@@ -4,7 +4,7 @@
  * Main routes
  */
 $app->get('/clients',                 'Sheaker\Controller\MainController::getSheakerClient');
-$app->get('/clients/index',           'Sheaker\Controller\MainController::indexClient');
+$app->put('/clients/index',           'Sheaker\Controller\MainController::indexClient');
 $app->get('/infos',                   'Sheaker\Controller\MainController::getSheakerInfos');
 
 /**
