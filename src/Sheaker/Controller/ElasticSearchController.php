@@ -32,8 +32,15 @@ class ElasticSearchController
                     'type'   => 'date',
                     'format' => 'date'
                 ],
+                'failed_logins' => [
+                    'type' => 'integer',
+                ],
                 'payments' => [
-                    'type' => 'nested'
+                    'type' => 'nested',
+                    'properties' => [
+                        'days'  => [ 'type' => 'integer' ],
+                        'price' => [ 'type' => 'integer' ]
+                    ]
                 ],
                 'checkins' => [
                     'type' => 'nested'
@@ -53,11 +60,11 @@ class ElasticSearchController
             $payments = [];
             foreach ($app['repository.payment']->findAll(0, 0, ['created_at' => 'asc'], ['user_id' => $u->getId()]) as $p) {
                 array_push($payments, [
-                        'id'             => (int)$p->getId(),
+                        'id'             => $p->getId(),
                         'start_date'     => $p->getStartDate(),
                         'end_date'       => $p->getEndDate(),
-                        'days'           => (int)$p->getDays(),
-                        'price'          => (int)$p->getPrice(),
+                        'days'           => $p->getDays(),
+                        'price'          => $p->getPrice(),
                         'payment_method' => $p->getMethod(),
                         'comment'        => $p->getComment(),
                         'created_at'     => $p->getCreatedAt()
@@ -68,7 +75,7 @@ class ElasticSearchController
             $checkins = [];
             foreach ($app['repository.checkin']->findAll(0, 0, ['created_at' => 'asc'], ['user_id' => $u->getId()]) as $ci) {
                 array_push($checkins, [
-                        'id'         => (int)$ci->getId(),
+                        'id'         => $ci->getId(),
                         'created_at' => $ci->getCreatedAt()
                     ]
                 );
@@ -81,7 +88,7 @@ class ElasticSearchController
             ];
 
             $params['body'][] = [
-                'id'               => (int)$u->getId(),
+                'id'               => $u->getId(),
                 'first_name'       => $u->getFirstName(),
                 'last_name'        => $u->getLastName(),
                 'password'         => $u->getPassword(),
@@ -98,7 +105,7 @@ class ElasticSearchController
                 'comment'          => $u->getComment(),
                 'last_seen'        => $u->getLastSeen(),
                 'last_ip'          => $u->getLastIP(),
-                'failed_logins'    => (int)$u->getFailedLogins(),
+                'failed_logins'    => $u->getFailedLogins(),
                 'created_at'       => $u->getCreatedAt(),
                 'deleted_at'       => $u->getDeletedAt(),
                 'user_level'       => $u->getUserLevel(),
