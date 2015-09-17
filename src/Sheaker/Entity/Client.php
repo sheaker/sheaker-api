@@ -33,6 +33,13 @@ class Client
     public $secretKey;
 
     /**
+     *Secret Key use to encrypt token.
+     *
+     * @var integer
+     */
+    public $flags;
+
+    /**
      * When the client entity was created.
      *
      * @var string
@@ -74,6 +81,15 @@ class Client
     public function setSecretKey($secretKey)
     {
         return $this->secretKey = $secretKey;
+    }
+
+    public function getFlags()
+    {
+        return $this->flags;
+    }
+    public function setFlags($flags)
+    {
+        return $this->flags = $flags;
     }
 
     public function getCreatedAt()

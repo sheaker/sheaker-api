@@ -1,6 +1,6 @@
 APP_NAME=sheaker-back
 
-TEMP_FILE=~/$APP_NAME.tar.gz
+TEMP_FILE=~/$APP_NAME.tar
 TEMP_DIR=~/$APP_NAME
 PROD_DIR=/var/www/sheaker.com/$APP_NAME
 PROD_NAME=$(date +%s)
@@ -9,12 +9,12 @@ PROD_NAME=$(date +%s)
 mkdir $TEMP_DIR/logs
 chmod 777 $TEMP_DIR/logs
 
-# Put correct rights
-sudo chown -R ubuntu:www-data $TEMP_DIR
-
 cp -pr $TEMP_DIR $PROD_DIR/$PROD_NAME
 
 cd $PROD_DIR
+
+# Put correct rights
+sudo chown -R ubuntu:www-data $PROD_NAME
 
 # Copy configuration file from previous deploy
 cp -p current/config/production.php $PROD_NAME/config
