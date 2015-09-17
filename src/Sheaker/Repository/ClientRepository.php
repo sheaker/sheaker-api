@@ -30,7 +30,8 @@ class ClientRepository implements RepositoryInterface
         $clientData = array(
             'name'        => $client->getName(),
             'subdomain'   => $client->getSubdomain(),
-            'secret_key'  => $client->getSecretKey()
+            'secret_key'  => $client->getSecretKey(),
+            'flags'       => $client->getFlags()
         );
 
         if ($client->getId()) {
@@ -154,6 +155,7 @@ class ClientRepository implements RepositoryInterface
         $client->setName($clientData['name']);
         $client->setSubdomain($clientData['subdomain']);
         $client->setSecretKey($clientData['secret_key']);
+        $client->setFlags($clientData['flags']);
         $client->setCreatedAt(date('c', strtotime($clientData['created_at'])));
 
         return $client;

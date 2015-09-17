@@ -153,5 +153,6 @@ $app->error(function (\Exception $e, $code) use ($app) {
 $app->match('{url}', function($url) use ($app) { return 'OK'; })->assert('url', '.*')->method('OPTIONS');
 
 require_once __DIR__ . '/routing.php';
+require_once __DIR__ . '/constants.php';
 
 return $app;

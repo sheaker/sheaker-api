@@ -3,8 +3,9 @@
 /**
  * Main routes
  */
-$app->get('/clients',                   'Sheaker\Controller\MainController::getSheakerClient');
-$app->get('/infos',                     'Sheaker\Controller\MainController::getSheakerInfos');
+$app->get('/clients',                 'Sheaker\Controller\MainController::getSheakerClient');
+$app->get('/clients/index',           'Sheaker\Controller\MainController::indexClient');
+$app->get('/infos',                   'Sheaker\Controller\MainController::getSheakerInfos');
 
 /**
  * Users routes
@@ -75,8 +76,3 @@ $app->get('/users/{user_id}/checkins',  'Sheaker\Controller\CheckinController::g
 $app->post('/users/{user_id}/checkins', 'Sheaker\Controller\CheckinController::addCheckin')
     ->assert('user_id', '\d+')
     ->before($beforeCheckToken);
-
-/**
- * Elasticsearch routes
- */
-$app->post('/elasticsearch/indexing', 'Sheaker\Controller\ElasticSearchController::indexing');

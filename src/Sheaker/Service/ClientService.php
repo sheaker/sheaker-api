@@ -16,6 +16,9 @@ class ClientService
      */
     protected $app;
 
+    /**
+     * @var \Sheaker\Entity\Client $client
+     */
     protected $client;
 
     public function __construct(Application $app)
