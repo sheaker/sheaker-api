@@ -134,7 +134,7 @@ class UserController
         return json_encode($response, JSON_NUMERIC_CHECK);
     }
 
-    public function getUsersSearch(Request $request, Application $app)
+    public function searchUsers(Request $request, Application $app)
     {
         $token = $app['jwt']->getDecodedToken();
 
