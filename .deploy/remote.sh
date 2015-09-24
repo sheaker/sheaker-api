@@ -19,11 +19,6 @@ sudo chown -R ubuntu:www-data $PROD_NAME
 # Copy configuration file from previous deploy
 cp -p current/config/production.php $PROD_NAME/config
 
-# Setup the symbolic link to photos
-cd $PROD_NAME/public
-ln -s ../../photos photos
-cd ../../
-
 sudo /etc/init.d/nginx stop
 
 # Switch versions
