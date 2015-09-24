@@ -261,17 +261,25 @@ class UserController
         $addParams['comment']        = $app->escape($request->get('comment'));
         $addParams['userLevel']      = $app->escape($request->get('user_level'));
 
-        $photoPath = '';
+        $photoURL = '';
         if (!empty($addParams['photo'])) {
-            $clientPhotosPath = 'photos/' . $app->escape($request->get('id_client'));
-            if (!file_exists($clientPhotosPath)) {
-                mkdir($clientPhotosPath);
+            $s3 = $app['aws']->createS3();
+
+            $bucketName = ($app['debug']) ? 'sheaker-dev' : 'sheaker-' . md5('client_' . $app['client.id']);
+            if (!$s3->doesBucketExist($bucketName)) {
+                $s3->createBucket(['Bucket' => $bucketName]);
             }
 
             $image = explode(',', $addParams['photo']);
             if (preg_match('/\/(\w*);/', $image[0], $matches)) {
-                $photoPath = $clientPhotosPath . '/' . uniqid() . '.' . $matches[1];
-                file_put_contents($photoPath, base64_decode($image[1]));
+                $s3AddResult = $s3->putObject([
+                    'Bucket' => $bucketName,
+                    'Key'    => uniqid() . '.' . $matches[1],
+                    'Body'   => base64_decode($image[1]),
+                    'ACL'    => 'public-read',
+                ]);
+
+                $photoURL = $s3AddResult['ObjectURL'];
             }
         }
 
@@ -289,7 +297,7 @@ class UserController
         $user->setCity($addParams['city']);
         $user->setZip($addParams['zip']);
         $user->setGender(($addParams['gender'] != '') ? $addParams['gender'] : null);
-        $user->setPhoto($photoPath);
+        $user->setPhoto($photoURL);
         $user->setSponsor(($addParams['sponsor']) ? $addParams['sponsor'] : null);
         $user->setComment($addParams['comment']);
         $user->setFailedLogins(0);
@@ -370,21 +378,33 @@ class UserController
             $app->abort(Response::HTTP_NOT_FOUND, 'User not found');
         }
 
-        $photoPath = '';
+        $photoURL = '';
         if (!empty($editParams['photo'])) {
-            if (file_exists($user->getPhoto())) {
-                unlink($user->getPhoto());
-            }
+            $s3 = $app['aws']->createS3();
 
-            $clientPhotosPath = 'photos/' . $app->escape($request->get('id_client'));
-            if (!file_exists($clientPhotosPath)) {
-                mkdir($clientPhotosPath);
+            $bucketName = ($app['debug']) ? 'sheaker-dev' : 'sheaker-' . md5('client_' . $app['client.id']);
+            if (!$s3->doesBucketExist($bucketName)) {
+                $s3->createBucket(['Bucket' => $bucketName]);
             }
 
             $image = explode(',', $editParams['photo']);
             if (preg_match('/\/(\w*);/', $image[0], $matches)) {
-                $photoPath = $clientPhotosPath . '/' . uniqid() . '.' . $matches[1];
-                file_put_contents($photoPath, base64_decode($image[1]));
+                $photoName = basename($user->getPhoto());
+                if ($photoName && $s3->doesObjectExist($bucketName, $photoName)) {
+                    $s3DeleteResult = $s3->deleteObject([
+                        'Bucket' => $bucketName,
+                        'Key'    => $photoName
+                    ]);
+                }
+
+                $s3AddResult = $s3->putObject([
+                    'Bucket' => $bucketName,
+                    'Key'    => uniqid() . '.' . $matches[1],
+                    'Body'   => base64_decode($image[1]),
+                    'ACL'    => 'public-read',
+                ]);
+
+                $photoURL = $s3AddResult['ObjectURL'];
             }
         }
 
@@ -398,7 +418,7 @@ class UserController
         $user->setCity($editParams['city']);
         $user->setZip($editParams['zip']);
         $user->setGender(($editParams['gender'] != '') ? $editParams['gender'] : null);
-        $user->setPhoto($photoPath);
+        $user->setPhoto($photoURL);
         $user->setSponsor(($editParams['sponsor']) ? $editParams['sponsor'] : null);
         $user->setComment($editParams['comment']);
         $user->setUserLevel($editParams['userLevel']);
@@ -427,7 +447,7 @@ class UserController
         ];
 
         if (!empty($editParams['photo'])) {
-            $params['body']['doc']['photo'] = $photoPath;
+            $params['body']['doc']['photo'] = $user->getPhoto();
         }
 
         $app['elasticsearch.client']->update($params);
