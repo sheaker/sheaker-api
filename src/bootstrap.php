@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Elasticsearch\ClientBuilder;
+use Aws\Silex\AwsServiceProvider;
 
 define('APPLICATION_ENV', getenv('APPLICATION_ENV') ?: 'production');
 
@@ -75,6 +76,10 @@ $app['elasticsearch.client'] = function($app) {
                         ->setLogger(ClientBuilder::defaultLogger($app['elasticsearch.config']['logPath']))
                         ->build();
 };
+
+$app->register(new AwsServiceProvider(), [
+    'aws.config' => $app['aws.config']
+]);
 
 /**
  * Register our custom services

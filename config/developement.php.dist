@@ -27,6 +27,18 @@ $app['elasticsearch.config'] = [
 ];
 
 /**
+ * AWS configuration
+ */
+$app['aws.config'] = [
+    'version' => 'latest',
+    'region'  => 'us-east-1',
+    'credentials' => [
+        'key'    => '',
+        'secret' => '',
+    ]
+];
+
+/**
  * Miscellaneous
  */
 $app['timezone'] = 'UTC';
