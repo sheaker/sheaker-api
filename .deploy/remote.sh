@@ -20,12 +20,14 @@ sudo chown -R ubuntu:www-data $PROD_NAME
 cp -p current/config/production.php $PROD_NAME/config
 
 sudo /etc/init.d/nginx stop
+sudo /etc/init.d/php-fpm stop
 
 # Switch versions
 unlink current
 ln -s $PROD_NAME current
 
 sudo /etc/init.d/nginx start
+sudo /etc/init.d/php-fpm start
 
 rm -rf $TEMP_DIR
 rm -rf $TEMP_FILE
