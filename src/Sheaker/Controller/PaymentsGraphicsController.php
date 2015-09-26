@@ -17,8 +17,9 @@ class PaymentsGraphicsController
         }
 
         $getParams = [];
-        $getParams['interval'] = $app->escape($request->get('interval', 'month'));
         $getParams['fromDate'] = $app->escape($request->get('from_date'));
+        $getParams['toDate']   = $app->escape($request->get('to_date',  date('c')));
+        $getParams['interval'] = $app->escape($request->get('interval', 'month'));
 
         $aggs = [
             'payments' => [
@@ -30,7 +31,8 @@ class PaymentsGraphicsController
                 'filter' => [
                     'range' => [
                         'payments.created_at' => [
-                            'gte' => $getParams['fromDate']
+                            'gte' => $getParams['fromDate'],
+                            'lte' => $getParams['toDate']
                         ]
                     ]
                 ]

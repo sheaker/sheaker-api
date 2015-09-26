@@ -18,13 +18,7 @@ class CheckinsGraphicsController
 
         $getParams = [];
         $getParams['fromDate'] = $app->escape($request->get('from_date'));
-
-        foreach ($getParams as $value) {
-            if (!isset($value)) {
-                $app->abort(Response::HTTP_BAD_REQUEST, 'Missing parameters');
-            }
-        }
-
+        $getParams['toDate']   = $app->escape($request->get('to_date',  date('c')));
         $getParams['interval'] = $app->escape($request->get('interval', 'month'));
 
         $params = [];
@@ -42,7 +36,8 @@ class CheckinsGraphicsController
                             'filter' => [
                                 'range' => [
                                     'checkins.created_at' => [
-                                        'gte' => $getParams['fromDate']
+                                        'gte' => $getParams['fromDate'],
+                                        'lte' => $getParams['toDate']
                                     ]
                                 ]
                             ],
