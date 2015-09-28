@@ -21,45 +21,42 @@ class UsersGraphicsController
         $getParams['toDate']   = $app->escape($request->get('to_date',  date('c')));
         $getParams['interval'] = $app->escape($request->get('interval', 'month'));
 
-        $aggs = [
-            'from_date' => [
-                'filter' => [
-                    'range' => [
-                        'created_at' => [
-                            'gte' => $getParams['fromDate'],
-                            'lte' => $getParams['toDate']
-                        ]
-                    ]
-                ]
-            ],
-            'new_users_over_time' => [
-               'date_histogram' => [
-                   'field'    => 'created_at',
-                   'interval' => $getParams['interval'],
-                   'format'   => 'YYYY-MM-dd'
-                ]
+        $queries = [];
+        $queries['from_date']['range'] = [
+            'created_at' => [
+                'gte' => $getParams['fromDate']
             ]
+        ];
+        $queries['to_date']['range'] = [
+            'created_at' => [
+                'lte' => $getParams['toDate']
+            ]
+        ];
+
+        $aggs = [];
+        $aggs['new_users_over_time']['date_histogram'] = [
+            'field'    => 'created_at',
+            'interval' => $getParams['interval'],
+            'format'   => 'YYYY-MM-dd'
         ];
 
         $params = [];
         $params['index']       = 'client_' . $app['client.id'];
         $params['type']        = 'user';
         $params['search_type'] = 'count';
-        $params['body']  = [
-            'aggs' => ($getParams['fromDate']) ? [
-                'from_date' => array_merge(
-                    $aggs['from_date'], [
-                        'aggs' => [
-                            'new_users_over_time' => $aggs['new_users_over_time'],
-                        ]
-                    ])
-            ] : [
-                'new_users_over_time' => $aggs['new_users_over_time'],
-            ]
+
+        $params['body']['query']['bool']['must'] = [
+            $queries['from_date'],
+            $queries['to_date']
+        ];
+        $params['body']['aggs'] = [
+            'new_users_over_time' => $aggs['new_users_over_time']
         ];
 
+        //echo json_encode($params['body']);
+
         $queryResponse = $app['elasticsearch.client']->search($params);
-        $queryResponse = ($getParams['fromDate']) ? $queryResponse['aggregations']['from_date']['new_users_over_time'] : $queryResponse['aggregations']['new_users_over_time'];
+        $queryResponse = $queryResponse['aggregations']['new_users_over_time'];
 
         $response = [
             'labels' => [],
@@ -84,26 +81,28 @@ class UsersGraphicsController
             $app->abort(Response::HTTP_FORBIDDEN, 'Forbidden');
         }
 
+        $getParams = [];
+        $getParams['fromDate'] = $app->escape($request->get('from_date'));
+        $getParams['toDate']   = $app->escape($request->get('to_date',  date('c')));
+
+        $filters = [];
+        $filters['gender_m']['term'] = [
+            'gender' => 0
+        ];
+        $filters['gender_f']['term'] = [
+            'gender' => 1
+        ];
+
         $params = [];
         $params['index']       = 'client_' . $app['client.id'];
         $params['type']        = 'user';
         $params['search_type'] = 'count';
-        $params['body']  = [
-            'aggs' => [
-                'gender_m' => [
-                    'filter' => [
-                        'term' => [
-                            'gender' => 0
-                        ]
-                    ]
-                ],
-                'gender_f' => [
-                    'filter' => [
-                        'term' => [
-                            'gender' => 1
-                        ]
-                    ]
-                ]
+        $params['body']['aggs'] = [
+            'gender_m' => [
+                'filter' => $filters['gender_m']
+            ],
+            'gender_f' => [
+                'filter' => $filters['gender_f']
             ]
         ];
 
