@@ -21,13 +21,13 @@ class PaymentsGraphicsController
         $getParams['toDate']   = $app->escape($request->get('to_date',  date('c')));
         $getParams['interval'] = $app->escape($request->get('interval', 'month'));
 
-        $filters = [];
-        $filters['from_date']['range'] = [
+        $queries = [];
+        $queries['from_date']['range'] = [
             'payments.created_at' => [
                 'gte' => $getParams['fromDate']
             ]
         ];
-        $filters['to_date']['range'] = [
+        $queries['to_date']['range'] = [
             'payments.created_at' => [
                 'lte' => $getParams['toDate']
             ]
@@ -43,30 +43,37 @@ class PaymentsGraphicsController
             'field' => 'payments.price'
         ];
 
-        $params = [];
-        $params['index']       = 'client_' . $app['client.id'];
-        $params['type']        = 'user';
-        $params['search_type'] = 'count';
+        $params = [
+            'index'       => 'client_' . $app['client.id'],
+            'type'        => 'user',
+            'search_type' => 'count',
+            'body'        => [
+                'query' => [
+                    'nested' => [
+                        'path' => 'payments',
+                        'query' => [
+                            'bool' => [
+                                'must' => [ $queries['from_date'], $queries['to_date'] ]
+                            ]
+                        ]
+                    ]
+                ],
+                'aggs' => [
+                    'payments' => [
+                        'nested'  => [
+                            'path' => 'payments'
+                        ],
+                        'aggs' => [
+                            'over_time' => $aggs['over_time']
+                        ]
+                    ]
+                ]
+            ]
+        ];
 
-        $params['body']['query']['nested'] = [
-            'path' => 'payments'
-        ];
-        $params['body']['query']['nested']['query']['bool']['must'] = [
-            $filters['from_date'],
-            $filters['to_date']
-        ];
-
-        $params['body']['aggs']['payments']['nested'] = [
-            'path' => 'payments'
-        ];
-        $params['body']['aggs']['payments']['aggs'] = [
-            'over_time' => $aggs['over_time']
-        ];
         $params['body']['aggs']['payments']['aggs']['over_time']['aggs'] = [
             'gain' => $aggs['gain']
         ];
-
-        //echo json_encode($params['body']);
 
         $queryResponse = $app['elasticsearch.client']->search($params);
         $queryResponse = $queryResponse['aggregations']['payments']['over_time'];

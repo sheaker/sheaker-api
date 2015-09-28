@@ -40,20 +40,21 @@ class UsersGraphicsController
             'format'   => 'YYYY-MM-dd'
         ];
 
-        $params = [];
-        $params['index']       = 'client_' . $app['client.id'];
-        $params['type']        = 'user';
-        $params['search_type'] = 'count';
-
-        $params['body']['query']['bool']['must'] = [
-            $queries['from_date'],
-            $queries['to_date']
+        $params = [
+            'index'       => 'client_' . $app['client.id'],
+            'type'        => 'user',
+            'search_type' => 'count',
+            'body'        => [
+                'query' => [
+                    'bool' => [
+                        'must' => [ $queries['from_date'], $queries['to_date'] ]
+                    ]
+                ],
+                'aggs' => [
+                    'new_users_over_time' => $aggs['new_users_over_time']
+                ]
+            ]
         ];
-        $params['body']['aggs'] = [
-            'new_users_over_time' => $aggs['new_users_over_time']
-        ];
-
-        //echo json_encode($params['body']);
 
         $queryResponse = $app['elasticsearch.client']->search($params);
         $queryResponse = $queryResponse['aggregations']['new_users_over_time'];
@@ -85,6 +86,18 @@ class UsersGraphicsController
         $getParams['fromDate'] = $app->escape($request->get('from_date'));
         $getParams['toDate']   = $app->escape($request->get('to_date',  date('c')));
 
+        $queries = [];
+        $queries['from_date']['range'] = [
+            'created_at' => [
+                'gte' => $getParams['fromDate']
+            ]
+        ];
+        $queries['to_date']['range'] = [
+            'created_at' => [
+                'lte' => $getParams['toDate']
+            ]
+        ];
+
         $filters = [];
         $filters['gender_m']['term'] = [
             'gender' => 0
@@ -93,16 +106,24 @@ class UsersGraphicsController
             'gender' => 1
         ];
 
-        $params = [];
-        $params['index']       = 'client_' . $app['client.id'];
-        $params['type']        = 'user';
-        $params['search_type'] = 'count';
-        $params['body']['aggs'] = [
-            'gender_m' => [
-                'filter' => $filters['gender_m']
-            ],
-            'gender_f' => [
-                'filter' => $filters['gender_f']
+        $params = [
+            'index'       => 'client_' . $app['client.id'],
+            'type'        => 'user',
+            'search_type' => 'count',
+            'body'        => [
+                'query' => [
+                    'bool' => [
+                        'must' => [ $queries['from_date'], $queries['to_date'] ]
+                    ]
+                ],
+                'aggs' => [
+                    'gender_m' => [
+                        'filter' => $filters['gender_m']
+                    ],
+                    'gender_f' => [
+                        'filter' => $filters['gender_f']
+                    ]
+                ]
             ]
         ];
 

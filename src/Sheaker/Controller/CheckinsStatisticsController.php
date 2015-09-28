@@ -18,34 +18,31 @@ class CheckinsStatisticsController
 
         $getParams = [];
         $getParams['fromDate'] = $app->escape($request->get('from_date'));
+        $getParams['toDate']   = $app->escape($request->get('to_date', date('c')));
 
-        foreach ($getParams as $value) {
-            if (!isset($value)) {
-                $app->abort(Response::HTTP_BAD_REQUEST, 'Missing parameters');
-            }
-        }
+        $queries = [];
+        $queries['from_date']['range'] = [
+            'checkins.created_at' => [
+                'gte' => $getParams['fromDate']
+            ]
+        ];
+        $queries['to_date']['range'] = [
+            'checkins.created_at' => [
+                'lte' => $getParams['toDate']
+            ]
+        ];
 
-        $getParams['toDate'] = $app->escape($request->get('to_date', date('c')));
-
-        $params = [];
-        $params['index']       = 'client_' . $app['client.id'];
-        $params['type']        = 'user';
-        $params['search_type'] = 'count';
-        $params['body']        = [
-            'query' => [
-                'nested' => [
-                    'path' => 'checkins',
-                    'query' => [
-                        'bool' => [
-                            'must' => [
-                                [
-                                    'range' => [
-                                        'checkins.created_at' => [
-                                            'gte'    => $getParams['fromDate'],
-                                            'lte'    => $getParams['toDate']
-                                        ]
-                                    ]
-                                ]
+        $params = [
+            'index'       => 'client_' . $app['client.id'],
+            'type'        => 'user',
+            'search_type' => 'count',
+            'body'        => [
+                'query' => [
+                    'nested' => [
+                        'path' => 'checkins',
+                        'query' => [
+                            'bool' => [
+                                'must' => [ $queries['from_date'], $queries['to_date'] ]
                             ]
                         ]
                     ]

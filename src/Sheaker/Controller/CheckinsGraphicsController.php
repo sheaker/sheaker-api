@@ -21,35 +21,47 @@ class CheckinsGraphicsController
         $getParams['toDate']   = $app->escape($request->get('to_date',  date('c')));
         $getParams['interval'] = $app->escape($request->get('interval', 'month'));
 
-        $params = [];
-        $params['index']       = 'client_' . $app['client.id'];
-        $params['type']        = 'user';
-        $params['search_type'] = 'count';
-        $params['body']  = [
-            'aggs' => [
-                'checkins' => [
+        $queries = [];
+        $queries['from_date']['range'] = [
+            'checkins.created_at' => [
+                'gte' => $getParams['fromDate']
+            ]
+        ];
+        $queries['to_date']['range'] = [
+            'checkins.created_at' => [
+                'lte' => $getParams['toDate']
+            ]
+        ];
+
+        $aggs = [];
+        $aggs['over_time']['date_histogram'] = [
+           'field'    => 'checkins.created_at',
+           'interval' => $getParams['interval'],
+           'format'   => 'YYYY-MM-dd'
+        ];
+
+        $params = [
+            'index'       => 'client_' . $app['client.id'],
+            'type'        => 'user',
+            'search_type' => 'count',
+            'body'        => [
+                'query' => [
                     'nested' => [
-                        'path' => 'checkins'
-                    ],
-                    'aggs' => [
-                        'new_checkins_since' => [
-                            'filter' => [
-                                'range' => [
-                                    'checkins.created_at' => [
-                                        'gte' => $getParams['fromDate'],
-                                        'lte' => $getParams['toDate']
-                                    ]
-                                ]
-                            ],
-                            'aggs' => [
-                                'new_checkins_over_time' => [
-                                    'date_histogram' => [
-                                        'field'    => 'checkins.created_at',
-                                        'interval' => $getParams['interval'],
-                                        'format'   => 'YYYY-MM-dd'
-                                    ]
-                                ]
+                        'path' => 'checkins',
+                        'query' => [
+                            'bool' => [
+                                'must' => [ $queries['from_date'], $queries['to_date'] ]
                             ]
+                        ]
+                    ]
+                ],
+                'aggs' => [
+                    'checkins' => [
+                        'nested'  => [
+                            'path' => 'checkins'
+                        ],
+                        'aggs' => [
+                            'over_time' => $aggs['over_time']
                         ]
                     ]
                 ]
@@ -64,7 +76,7 @@ class CheckinsGraphicsController
         ];
 
         $data = [];
-        foreach ($queryResponse['aggregations']['checkins']['new_checkins_since']['new_checkins_over_time']['buckets'] as $bucket) {
+        foreach ($queryResponse['aggregations']['checkins']['over_time']['buckets'] as $bucket) {
             array_push($response['labels'], $bucket['key_as_string']);
             array_push($data, $bucket['doc_count']);
         }

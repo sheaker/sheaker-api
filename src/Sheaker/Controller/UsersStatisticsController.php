@@ -16,31 +16,33 @@ class UsersStatisticsController
             $app->abort(Response::HTTP_FORBIDDEN, 'Forbidden');
         }
 
-        $params = [];
-        $params['index']       = 'client_' . $app['client.id'];
-        $params['type']        = 'user';
-        $params['search_type'] = 'count';
-        $params['body']        = [
-            'query' => [
-                'nested' => [
-                    'path'   =>'payments',
-                    'filter' => [
-                        'bool' => [
-                            'must' => [
-                                [
-                                    'range' => [
-                                        'payments.start_date' => [
-                                            'lte' => 'now'
-                                        ]
-                                    ]
-                                ],
-                                [
-                                    'range' => [
-                                        'payments.end_date' => [
-                                            'gte' => 'now'
-                                        ]
-                                    ]
-                                ]
+        $getParams = [];
+        $getParams['fromDate'] = $app->escape($request->get('from_date', date('c')));
+        $getParams['toDate']   = $app->escape($request->get('to_date',  date('c')));
+
+        $queries = [];
+        $queries['from_date']['range'] = [
+            'payments.start_date' => [
+                'lte' => $getParams['fromDate']
+            ]
+        ];
+        $queries['to_date']['range'] = [
+            'payments.end_date' => [
+                'gte' => $getParams['toDate']
+            ]
+        ];
+
+        $params = [
+            'index'       => 'client_' . $app['client.id'],
+            'type'        => 'user',
+            'search_type' => 'count',
+            'body'        => [
+                'query' => [
+                    'nested' => [
+                        'path' => 'payments',
+                        'query' => [
+                            'bool' => [
+                                'must' => [ $queries['from_date'], $queries['to_date'] ]
                             ]
                         ]
                     ]
@@ -63,25 +65,28 @@ class UsersStatisticsController
 
         $getParams = [];
         $getParams['fromDate'] = $app->escape($request->get('from_date'));
-
-        foreach ($getParams as $value) {
-            if (!isset($value)) {
-                $app->abort(Response::HTTP_BAD_REQUEST, 'Missing parameters');
-            }
-        }
-
         $getParams['toDate'] = $app->escape($request->get('to_date', date('c')));
 
-        $params = [];
-        $params['index']       = 'client_' . $app['client.id'];
-        $params['type']        = 'user';
-        $params['search_type'] = 'count';
-        $params['body']        = [
-            'query' => [
-                'range' => [
-                    'created_at' => [
-                        'gte'    => $getParams['fromDate'],
-                        'lte'    => $getParams['toDate']
+        $queries = [];
+        $queries['from_date']['range'] = [
+            'created_at' => [
+                'gte' => $getParams['fromDate']
+            ]
+        ];
+        $queries['to_date']['range'] = [
+            'created_at' => [
+                'lte' => $getParams['toDate']
+            ]
+        ];
+
+        $params = [
+            'index'       => 'client_' . $app['client.id'],
+            'type'        => 'user',
+            'search_type' => 'count',
+            'body'        => [
+                'query' => [
+                    'bool' => [
+                        'must' => [ $queries['from_date'], $queries['to_date'] ]
                     ]
                 ]
             ]
