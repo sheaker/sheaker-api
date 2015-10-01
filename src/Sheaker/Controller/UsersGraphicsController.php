@@ -18,6 +18,13 @@ class UsersGraphicsController
 
         $getParams = [];
         $getParams['fromDate'] = $app->escape($request->get('from_date'));
+
+        foreach ($getParams as $value) {
+            if (!isset($value)) {
+                $app->abort(Response::HTTP_BAD_REQUEST, 'Missing parameters');
+            }
+        }
+
         $getParams['toDate']   = $app->escape($request->get('to_date',  date('c')));
         $getParams['interval'] = $app->escape($request->get('interval', 'month'));
 
@@ -84,7 +91,14 @@ class UsersGraphicsController
 
         $getParams = [];
         $getParams['fromDate'] = $app->escape($request->get('from_date'));
-        $getParams['toDate']   = $app->escape($request->get('to_date',  date('c')));
+
+        foreach ($getParams as $value) {
+            if (!isset($value)) {
+                $app->abort(Response::HTTP_BAD_REQUEST, 'Missing parameters');
+            }
+        }
+
+        $getParams['toDate'] = $app->escape($request->get('to_date', date('c')));
 
         $queries = [];
         $queries['from_date']['range'] = [
