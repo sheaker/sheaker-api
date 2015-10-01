@@ -28,13 +28,13 @@ class PaymentsGraphicsController
         $getParams['toDate']   = $app->escape($request->get('to_date',  date('c')));
         $getParams['interval'] = $app->escape($request->get('interval', 'month'));
 
-        $queries = [];
-        $queries['from_date']['range'] = [
+        $filters = [];
+        $filters['from_date']['range'] = [
             'payments.created_at' => [
                 'gte' => $getParams['fromDate']
             ]
         ];
-        $queries['to_date']['range'] = [
+        $filters['to_date']['range'] = [
             'payments.created_at' => [
                 'lte' => $getParams['toDate']
             ]
@@ -64,7 +64,7 @@ class PaymentsGraphicsController
                             'from_date' => [
                                 'filter' => [
                                     'bool' => [
-                                        'must' => [ $queries['from_date'], $queries['to_date'] ]
+                                        'must' => [ $filters['from_date'], $filters['to_date'] ]
                                     ]
                                 ],
                                 'aggs' => [

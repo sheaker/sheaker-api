@@ -28,13 +28,13 @@ class CheckinsGraphicsController
         $getParams['toDate']   = $app->escape($request->get('to_date',  date('c')));
         $getParams['interval'] = $app->escape($request->get('interval', 'month'));
 
-        $queries = [];
-        $queries['from_date']['range'] = [
+        $filters = [];
+        $filters['from_date']['range'] = [
             'checkins.created_at' => [
                 'gte' => $getParams['fromDate']
             ]
         ];
-        $queries['to_date']['range'] = [
+        $filters['to_date']['range'] = [
             'checkins.created_at' => [
                 'lte' => $getParams['toDate']
             ]
@@ -52,23 +52,22 @@ class CheckinsGraphicsController
             'type'        => 'user',
             'search_type' => 'count',
             'body'        => [
-                'query' => [
-                    'nested' => [
-                        'path' => 'checkins',
-                        'query' => [
-                            'bool' => [
-                                'must' => [ $queries['from_date'], $queries['to_date'] ]
-                            ]
-                        ]
-                    ]
-                ],
                 'aggs' => [
                     'checkins' => [
-                        'nested'  => [
+                        'nested' => [
                             'path' => 'checkins'
                         ],
                         'aggs' => [
-                            'over_time' => $aggs['over_time']
+                            'from_date' => [
+                                'filter' => [
+                                    'bool' => [
+                                        'must' => [ $filters['from_date'], $filters['to_date'] ]
+                                    ]
+                                ],
+                                'aggs' => [
+                                    'over_time' => $aggs['over_time']
+                                ]
+                            ]
                         ]
                     ]
                 ]
@@ -76,6 +75,7 @@ class CheckinsGraphicsController
         ];
 
         $queryResponse = $app['elasticsearch.client']->search($params);
+        $queryResponse = $queryResponse['aggregations']['checkins']['from_date']['over_time'];
 
         $response = [
             'labels' => [],
@@ -83,7 +83,7 @@ class CheckinsGraphicsController
         ];
 
         $data = [];
-        foreach ($queryResponse['aggregations']['checkins']['over_time']['buckets'] as $bucket) {
+        foreach ($queryResponse['buckets'] as $bucket) {
             array_push($response['labels'], $bucket['key_as_string']);
             array_push($data, $bucket['doc_count']);
         }
