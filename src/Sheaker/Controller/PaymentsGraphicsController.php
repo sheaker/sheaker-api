@@ -48,35 +48,34 @@ class PaymentsGraphicsController
             'type'        => 'user',
             'search_type' => 'count',
             'body'        => [
-                'query' => [
-                    'nested' => [
-                        'path' => 'payments',
-                        'query' => [
-                            'bool' => [
-                                'must' => [ $queries['from_date'], $queries['to_date'] ]
-                            ]
-                        ]
-                    ]
-                ],
                 'aggs' => [
                     'payments' => [
-                        'nested'  => [
+                        'nested' => [
                             'path' => 'payments'
                         ],
                         'aggs' => [
-                            'over_time' => $aggs['over_time']
+                            'from_date' => [
+                                'filter' => [
+                                    'bool' => [
+                                        'must' => [ $queries['from_date'], $queries['to_date'] ]
+                                    ]
+                                ],
+                                'aggs' => [
+                                    'over_time' => $aggs['over_time']
+                                ]
+                            ]
                         ]
                     ]
                 ]
             ]
         ];
 
-        $params['body']['aggs']['payments']['aggs']['over_time']['aggs'] = [
+        $params['body']['aggs']['payments']['aggs']['from_date']['aggs']['over_time']['aggs'] = [
             'gain' => $aggs['gain']
         ];
 
         $queryResponse = $app['elasticsearch.client']->search($params);
-        $queryResponse = $queryResponse['aggregations']['payments']['over_time'];
+        $queryResponse = $queryResponse['aggregations']['payments']['from_date']['over_time'];
 
         $response = [
             'labels' => [],
