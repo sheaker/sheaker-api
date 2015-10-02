@@ -124,7 +124,7 @@ $app->before(function (Request $request, Application $app) {
         $request->request->replace(is_array($data) ? $data : array());
     }
 
-    if (strpos($request->getPathInfo(), 'info') === false) {
+    if (strpos($request->getPathInfo(), 'clients') === false) {
         $app['client']->fetchClient($request);
     }
 });

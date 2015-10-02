@@ -2,14 +2,68 @@
 
 namespace Sheaker\Controller;
 
-use Sheaker\Constants\ClientFlags;
 use Silex\Application;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\HttpKernelInterface;
+use Sheaker\Constants\ClientFlags;
+use Sheaker\Entity\Client;
 
 class MainController
 {
-    public function getSheakerClient(Request $request, Application $app)
+    public function createClient(Request $request, Application $app)
+    {
+        $getParams = [];
+        $getParams['name']      = $app->escape($request->get('name'));
+        $getParams['subdomain'] = $app->escape($request->get('subdomain'));
+        $getParams['email']     = $app->escape($request->get('email'));
+        $getParams['password']  = $app->escape($request->get('password'));
+
+        foreach ($getParams as $value) {
+            if (!isset($value)) {
+                $app->abort(Response::HTTP_BAD_REQUEST, 'Missing parameters');
+            }
+        }
+
+        // create our new client
+        $client = new Client();
+        $client->setName($getParams['name']);
+        $client->setSubdomain($getParams['subdomain']);
+        $client->setSecretKey(md5(uniqid(rand(), TRUE)));
+        $client->setFlags($client->getFlags() | ClientFlags::INDEX_ELASTICSEARCH);
+        $app['repository.client']->save($client);
+
+        $clientAppName = 'client_' . $client->getId();
+
+        // create client database
+        $app['dbs']['sheaker']->query("CREATE DATABASE ${clientAppName}; USE ${clientAppName};");
+        // Add our tables
+        $app['dbs']['sheaker']->query(file_get_contents(__DIR__ . '/../../../sql/base/client_database.sql'));
+        // Add admin user
+        $app['dbs']['sheaker']->query("
+            INSERT INTO
+                users (`first_name`, `last_name`, `password`, `mail`)
+            VALUES
+                ('admin', 'admin', '" . password_hash($getParams['password'], PASSWORD_DEFAULT) . "', '" . $getParams['email'] . "');
+        ");
+        // Add user rights
+        $app['dbs']['sheaker']->query("INSERT INTO users_access VALUES (LAST_INSERT_ID(), 3);");
+
+        // create indice ES
+        self::createElasticIndex($app, $clientAppName);
+
+        // create AWS S3 bucket
+        $s3 = $app['aws']->createS3();
+
+        $bucketName = 'sheaker-' . md5($clientAppName);
+        if (!$s3->doesBucketExist($bucketName)) {
+            $s3->createBucket(['Bucket' => $bucketName]);
+        }
+
+        return json_encode($client, JSON_NUMERIC_CHECK);
+    }
+
+    public function getClient(Request $request, Application $app)
     {
         $getParams = [];
         $getParams['subdomain'] = $app->escape($request->get('subdomain'));
@@ -41,41 +95,15 @@ class MainController
             $app->abort(Response::HTTP_FORBIDDEN, 'Forbidden');
         }
 
-        // First, delete existing index
         $params['index'] = 'client_' . $app['client.id'];
 
-        if ($app['elasticsearch.client']->indices()->exists(['index' => $params['index']]))
+        // First, delete existing index
+        if ($app['elasticsearch.client']->indices()->exists($params))
             $app['elasticsearch.client']->indices()->delete($params);
 
         // Then, create a new index with the mapping inside
-        $params['body']['mappings']['user'] = [
-            '_source' => [
-                'enabled' => true
-            ],
-            'properties' => [
-                'birthdate' => [
-                    'type'   => 'date',
-                    'format' => 'date'
-                ],
-                'failed_logins' => [
-                    'type' => 'integer',
-                ],
-                'payments' => [
-                    'type' => 'nested',
-                    'properties' => [
-                        'days'  => [ 'type' => 'integer' ],
-                        'price' => [ 'type' => 'integer' ]
-                    ]
-                ],
-                'checkins' => [
-                    'type' => 'nested'
-                ]
-            ]
-        ];
-        if (!$app['elasticsearch.client']->indices()->exists(['index' => $params['index']]))
-            $app['elasticsearch.client']->indices()->create($params);
+        self::createElasticIndex($app, $params['index']);
 
-        unset($params['body']['mappings']); // Delete mapping field from previous query
         $params['type']  = 'user';
 
         // Now, retrieve and put datas
@@ -161,5 +189,41 @@ class MainController
         $infos['reservedSubdomains'] = $reserved_subdomains;
 
         return json_encode($infos, JSON_NUMERIC_CHECK);
+    }
+
+    private function createElasticIndex($app, $clientIndex)
+    {
+        $params['index'] = $clientIndex;
+
+        if ($app['elasticsearch.client']->indices()->exists(['index' => $params['index']])) {
+            $app->abort(Response::HTTP_CONFLICT, 'Already exists');
+        }
+
+        $params['body']['mappings']['user'] = [
+            '_source' => [
+                'enabled' => true
+            ],
+            'properties' => [
+                'birthdate' => [
+                    'type'   => 'date',
+                    'format' => 'date'
+                ],
+                'failed_logins' => [
+                    'type' => 'integer',
+                ],
+                'payments' => [
+                    'type' => 'nested',
+                    'properties' => [
+                        'days'  => [ 'type' => 'integer' ],
+                        'price' => [ 'type' => 'integer' ]
+                    ]
+                ],
+                'checkins' => [
+                    'type' => 'nested'
+                ]
+            ]
+        ];
+
+        return $app['elasticsearch.client']->indices()->create($params);
     }
 }
