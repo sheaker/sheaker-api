@@ -17,47 +17,54 @@ class UsersGraphicsController
         }
 
         $getParams = [];
-        $getParams['interval'] = $app->escape($request->get('interval', 'month'));
         $getParams['fromDate'] = $app->escape($request->get('from_date'));
 
-        $aggs = [
-            'from_date' => [
-                'filter' => [
-                    'range' => [
-                        'created_at' => [
-                            'gte' => $getParams['fromDate']
-                        ]
-                    ]
-                ]
-            ],
-            'new_users_over_time' => [
-               'date_histogram' => [
-                   'field'    => 'created_at',
-                   'interval' => $getParams['interval'],
-                   'format'   => 'YYYY-MM-dd'
-                ]
+        foreach ($getParams as $value) {
+            if (!isset($value)) {
+                $app->abort(Response::HTTP_BAD_REQUEST, 'Missing parameters');
+            }
+        }
+
+        $getParams['toDate']   = $app->escape($request->get('to_date',  date('c')));
+        $getParams['interval'] = $app->escape($request->get('interval', 'month'));
+
+        $queries = [];
+        $queries['from_date']['range'] = [
+            'created_at' => [
+                'gte' => $getParams['fromDate']
+            ]
+        ];
+        $queries['to_date']['range'] = [
+            'created_at' => [
+                'lte' => $getParams['toDate']
             ]
         ];
 
-        $params = [];
-        $params['index']       = 'client_' . $app['client.id'];
-        $params['type']        = 'user';
-        $params['search_type'] = 'count';
-        $params['body']  = [
-            'aggs' => ($getParams['fromDate']) ? [
-                'from_date' => array_merge(
-                    $aggs['from_date'], [
-                        'aggs' => [
-                            'new_users_over_time' => $aggs['new_users_over_time'],
-                        ]
-                    ])
-            ] : [
-                'new_users_over_time' => $aggs['new_users_over_time'],
+        $aggs = [];
+        $aggs['new_users_over_time']['date_histogram'] = [
+            'field'    => 'created_at',
+            'interval' => $getParams['interval'],
+            'format'   => 'YYYY-MM-dd'
+        ];
+
+        $params = [
+            'index'       => 'client_' . $app['client.id'],
+            'type'        => 'user',
+            'search_type' => 'count',
+            'body'        => [
+                'query' => [
+                    'bool' => [
+                        'must' => [ $queries['from_date'], $queries['to_date'] ]
+                    ]
+                ],
+                'aggs' => [
+                    'new_users_over_time' => $aggs['new_users_over_time']
+                ]
             ]
         ];
 
         $queryResponse = $app['elasticsearch.client']->search($params);
-        $queryResponse = ($getParams['fromDate']) ? $queryResponse['aggregations']['from_date']['new_users_over_time'] : $queryResponse['aggregations']['new_users_over_time'];
+        $queryResponse = $queryResponse['aggregations']['new_users_over_time'];
 
         $response = [
             'labels' => [],
@@ -82,24 +89,53 @@ class UsersGraphicsController
             $app->abort(Response::HTTP_FORBIDDEN, 'Forbidden');
         }
 
-        $params = [];
-        $params['index']       = 'client_' . $app['client.id'];
-        $params['type']        = 'user';
-        $params['search_type'] = 'count';
-        $params['body']  = [
-            'aggs' => [
-                'gender_m' => [
-                    'filter' => [
-                        'term' => [
-                            'gender' => 0
-                        ]
+        $getParams = [];
+        $getParams['fromDate'] = $app->escape($request->get('from_date'));
+
+        foreach ($getParams as $value) {
+            if (!isset($value)) {
+                $app->abort(Response::HTTP_BAD_REQUEST, 'Missing parameters');
+            }
+        }
+
+        $getParams['toDate'] = $app->escape($request->get('to_date', date('c')));
+
+        $queries = [];
+        $queries['from_date']['range'] = [
+            'created_at' => [
+                'gte' => $getParams['fromDate']
+            ]
+        ];
+        $queries['to_date']['range'] = [
+            'created_at' => [
+                'lte' => $getParams['toDate']
+            ]
+        ];
+
+        $filters = [];
+        $filters['gender_m']['term'] = [
+            'gender' => 0
+        ];
+        $filters['gender_f']['term'] = [
+            'gender' => 1
+        ];
+
+        $params = [
+            'index'       => 'client_' . $app['client.id'],
+            'type'        => 'user',
+            'search_type' => 'count',
+            'body'        => [
+                'query' => [
+                    'bool' => [
+                        'must' => [ $queries['from_date'], $queries['to_date'] ]
                     ]
                 ],
-                'gender_f' => [
-                    'filter' => [
-                        'term' => [
-                            'gender' => 1
-                        ]
+                'aggs' => [
+                    'gender_m' => [
+                        'filter' => $filters['gender_m']
+                    ],
+                    'gender_f' => [
+                        'filter' => $filters['gender_f']
                     ]
                 ]
             ]

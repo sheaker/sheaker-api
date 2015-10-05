@@ -17,68 +17,72 @@ class PaymentsGraphicsController
         }
 
         $getParams = [];
-        $getParams['interval'] = $app->escape($request->get('interval', 'month'));
         $getParams['fromDate'] = $app->escape($request->get('from_date'));
 
-        $aggs = [
-            'payments' => [
-                'nested' => [
-                    'path' => 'payments'
-                ]
-            ],
-            'from_date' => [
-                'filter' => [
-                    'range' => [
-                        'payments.created_at' => [
-                            'gte' => $getParams['fromDate']
+        foreach ($getParams as $value) {
+            if (!isset($value)) {
+                $app->abort(Response::HTTP_BAD_REQUEST, 'Missing parameters');
+            }
+        }
+
+        $getParams['toDate']   = $app->escape($request->get('to_date',  date('c')));
+        $getParams['interval'] = $app->escape($request->get('interval', 'month'));
+
+        $filters = [];
+        $filters['from_date']['range'] = [
+            'payments.created_at' => [
+                'gte' => $getParams['fromDate']
+            ]
+        ];
+        $filters['to_date']['range'] = [
+            'payments.created_at' => [
+                'lte' => $getParams['toDate']
+            ]
+        ];
+
+        $aggs = [];
+        $aggs['over_time']['date_histogram'] = [
+           'field'    => 'payments.created_at',
+           'interval' => $getParams['interval'],
+           'format'   => 'YYYY-MM-dd'
+        ];
+        $aggs['gain']['sum'] = [
+            'field' => 'payments.price'
+        ];
+
+        $params = [
+            'index'       => 'client_' . $app['client.id'],
+            'type'        => 'user',
+            'search_type' => 'count',
+            'body'        => [
+                'aggs' => [
+                    'payments' => [
+                        'nested' => [
+                            'path' => 'payments'
+                        ],
+                        'aggs' => [
+                            'from_date' => [
+                                'filter' => [
+                                    'bool' => [
+                                        'must' => [ $filters['from_date'], $filters['to_date'] ]
+                                    ]
+                                ],
+                                'aggs' => [
+                                    'over_time' => $aggs['over_time']
+                                ]
+                            ]
                         ]
                     ]
                 ]
-            ],
-            'new_payments_over_time' => [
-               'date_histogram' => [
-                   'field'    => 'payments.created_at',
-                   'interval' => $getParams['interval'],
-                   'format'   => 'YYYY-MM-dd'
-                ]
-            ],
-            'monthly_gain' => [
-               'sum' => [
-                   'field' => 'payments.price'
-                ]
             ]
         ];
 
-        $params = [];
-        $params['index']       = 'client_' . $app['client.id'];
-        $params['type']        = 'user';
-        $params['search_type'] = 'count';
-        $params['body']  = [
-            'aggs' => [
-                'payments' => array_merge($aggs['payments'], [
-                    'aggs' => ($getParams['fromDate']) ? [
-                        'from_date' => array_merge($aggs['from_date'], [
-                                'aggs' => [
-                                    'new_payments_over_time' => array_merge($aggs['new_payments_over_time'], [
-                                        'aggs' => [
-                                            'monthly_gain' => $aggs['monthly_gain']
-                                        ]
-                                    ])
-                                ]
-                            ])
-                    ] : [
-                        'new_payments_over_time' => array_merge($aggs['new_payments_over_time'], [
-                            'aggs' => [
-                                'monthly_gain' => $aggs['monthly_gain']
-                            ]
-                        ])
-                    ]
-                ])
-            ]
+        $params['body']['aggs']['payments']['aggs']['from_date']['aggs']['over_time']['aggs'] = [
+            'gain' => $aggs['gain']
         ];
 
         $queryResponse = $app['elasticsearch.client']->search($params);
-        $queryResponse = ($getParams['fromDate']) ? $queryResponse['aggregations']['payments']['from_date']['new_payments_over_time'] : $queryResponse['aggregations']['payments']['new_payments_over_time'];
+        $queryResponse = $queryResponse['aggregations']['payments']['from_date']['over_time'];
 
         $response = [
             'labels' => [],
@@ -88,7 +92,7 @@ class PaymentsGraphicsController
         $data = [];
         foreach ($queryResponse['buckets'] as $bucket) {
             array_push($response['labels'], $bucket['key_as_string']);
-            array_push($data, $bucket['monthly_gain']['value']);
+            array_push($data, $bucket['gain']['value']);
         }
         array_push($response['data'], $data);
 

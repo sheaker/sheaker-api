@@ -27,25 +27,29 @@ class CheckinsStatisticsController
 
         $getParams['toDate'] = $app->escape($request->get('to_date', date('c')));
 
-        $params = [];
-        $params['index']       = 'client_' . $app['client.id'];
-        $params['type']        = 'user';
-        $params['search_type'] = 'count';
-        $params['body']        = [
-            'query' => [
-                'nested' => [
-                    'path' => 'checkins',
-                    'query' => [
-                        'bool' => [
-                            'must' => [
-                                [
-                                    'range' => [
-                                        'checkins.created_at' => [
-                                            'gte'    => $getParams['fromDate'],
-                                            'lte'    => $getParams['toDate']
-                                        ]
-                                    ]
-                                ]
+        $queries = [];
+        $queries['from_date']['range'] = [
+            'checkins.created_at' => [
+                'gte' => $getParams['fromDate']
+            ]
+        ];
+        $queries['to_date']['range'] = [
+            'checkins.created_at' => [
+                'lte' => $getParams['toDate']
+            ]
+        ];
+
+        $params = [
+            'index'       => 'client_' . $app['client.id'],
+            'type'        => 'user',
+            'search_type' => 'count',
+            'body'        => [
+                'query' => [
+                    'nested' => [
+                        'path' => 'checkins',
+                        'query' => [
+                            'bool' => [
+                                'must' => [ $queries['from_date'], $queries['to_date'] ]
                             ]
                         ]
                     ]
