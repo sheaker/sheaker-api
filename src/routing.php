@@ -5,7 +5,8 @@
  */
 $app->get('/clients',                 'Sheaker\Controller\MainController::getClient');
 $app->post('/clients',                'Sheaker\Controller\MainController::createClient');
-$app->put('/clients/index',           'Sheaker\Controller\MainController::indexClient');
+$app->put('/clients/index',           'Sheaker\Controller\MainController::indexClient')
+    ->before($beforeCheckToken);
 $app->get('/infos',                   'Sheaker\Controller\MainController::getSheakerInfos');
 
 /**
