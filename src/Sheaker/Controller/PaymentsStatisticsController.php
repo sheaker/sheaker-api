@@ -25,16 +25,15 @@ class PaymentsStatisticsController
             }
         }
 
-        $getParams['fromDate'] = $app->escape($request->get('from_date'));
-        $getParams['toDate']   = $app->escape($request->get('to_date',  date('c')));
+        $getParams['toDate']   = $app->escape($request->get('to_date', date('c')));
 
-        $queries = [];
-        $queries['from_date']['range'] = [
+        $filters = [];
+        $filters['from_date']['range'] = [
             'payments.created_at' => [
                 'gte' => $getParams['fromDate']
             ]
         ];
-        $queries['to_date']['range'] = [
+        $filters['to_date']['range'] = [
             'payments.created_at' => [
                 'lte' => $getParams['toDate']
             ]
@@ -50,23 +49,22 @@ class PaymentsStatisticsController
             'type'        => 'user',
             'search_type' => 'count',
             'body'        => [
-                'query' => [
-                    'nested' => [
-                        'path' => 'payments',
-                        'query' => [
-                            'bool' => [
-                                'must' => [ $queries['from_date'], $queries['to_date'] ]
-                            ]
-                        ]
-                    ]
-                ],
                 'aggs' => [
                     'payments' => [
                         'nested'  => [
                             'path' => 'payments'
                         ],
                         'aggs' => [
-                            'gains' => $aggs['gains']
+                            'from_date' => [
+                                'filter' => [
+                                    'bool' => [
+                                        'must' => [ $filters['from_date'], $filters['to_date'] ]
+                                    ]
+                                ],
+                                'aggs' => [
+                                    'gains' => $aggs['gains']
+                                ]
+                            ]
                         ]
                     ]
                 ]
@@ -75,6 +73,6 @@ class PaymentsStatisticsController
 
         $queryResponse = $app['elasticsearch.client']->search($params);
 
-        return json_encode($queryResponse['aggregations']['payments']['gains'], JSON_NUMERIC_CHECK);
+        return json_encode($queryResponse['aggregations']['payments']['from_date']['gains'], JSON_NUMERIC_CHECK);
     }
 }

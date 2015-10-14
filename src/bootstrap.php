@@ -123,13 +123,13 @@ $app->before(function (Request $request, Application $app) {
         $data = json_decode($request->getContent(), true);
         $request->request->replace(is_array($data) ? $data : array());
     }
-
-    if (strpos($request->getPathInfo(), 'info') === false) {
-        $app['client']->fetchClient($request);
-    }
 });
 
-$beforeCheckToken = function (Request $request, Application $app) {
+$fetchClient = function (Request $request, Application $app) {
+    $app['client']->fetchClient($request);
+};
+
+$checkToken = function (Request $request, Application $app) {
     $app['jwt']->checkTokenAuthenticity($request);
 };
 
