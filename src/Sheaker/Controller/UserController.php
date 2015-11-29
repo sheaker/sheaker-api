@@ -53,27 +53,7 @@ class UserController
             $app->abort(Response::HTTP_FORBIDDEN, 'Wrong password');
         }
 
-        return json_encode(['token' => $token], JSON_NUMERIC_CHECK);
-    }
-
-    public function renewToken(Request $request, Application $app)
-    {
-        $renewParams = [];
-        $renewParams['idClient'] = $app->escape($request->get('id_client'));
-        $renewParams['oldToken'] = $app->escape($request->get('oldToken'));
-
-        foreach ($renewParams as $value) {
-            if (!isset($value)) {
-                $app->abort(Response::HTTP_BAD_REQUEST, 'Missing parameters');
-            }
-        }
-
-        $oldToken = \JWT::decode($renewParams['oldToken'], $app['client']->getClient()->secretKey, false);
-
-        $exp = ($oldToken->user->rememberMe) ? time() + 60 * 60 * 24 * 30 : time() + 60 * 60 * 24; // expire in 30 days or 24h
-        $newToken = $app['jwt']->createToken($request, $exp, $oldToken->user);
-
-        return json_encode(['token' => $newToken], JSON_NUMERIC_CHECK);
+        return $app->json(['token' => $token], Response::HTTP_OK);
     }
 
     public function getUsersList(Request $request, Application $app)
@@ -131,7 +111,7 @@ class UserController
             array_push($response, $user);
         }
 
-        return json_encode($response, JSON_NUMERIC_CHECK);
+        return $app->json($response, Response::HTTP_OK);
     }
 
     public function searchUsers(Request $request, Application $app)
@@ -179,7 +159,7 @@ class UserController
             array_push($response, $user);
         }
 
-        return json_encode($response, JSON_NUMERIC_CHECK);
+        return $app->json($response, Response::HTTP_OK);
     }
 
     public function getUser(Request $request, Application $app, $user_id)
@@ -227,7 +207,7 @@ class UserController
         unset($user['payments']);
         unset($user['checkins']);
 
-        return json_encode($user, JSON_NUMERIC_CHECK);
+        return $app->json($user, Response::HTTP_OK);
     }
 
     public function addUser(Request $request, Application $app)
@@ -339,7 +319,7 @@ class UserController
 
         $app['elasticsearch.client']->index($params);
 
-        return json_encode($user, JSON_NUMERIC_CHECK);
+        return $app->json($user, Response::HTTP_CREATED);
     }
 
     public function editUser(Request $request, Application $app, $user_id)
@@ -452,7 +432,7 @@ class UserController
 
         $app['elasticsearch.client']->update($params);
 
-        return json_encode($user, JSON_NUMERIC_CHECK);
+        return $app->json($user, Response::HTTP_OK);
     }
 
     public function deleteUser(Request $request, Application $app, $user_id)
@@ -483,6 +463,6 @@ class UserController
 
         $app['elasticsearch.client']->update($params);
 
-        return json_encode($user, JSON_NUMERIC_CHECK);
+        return $app->json(null, Response::HTTP_NO_CONTENT);
     }
 }

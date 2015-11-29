@@ -60,7 +60,7 @@ class MainController
             $s3->createBucket(['Bucket' => $bucketName]);
         }
 
-        return json_encode($client, JSON_NUMERIC_CHECK);
+        return $app->json($client, Response::HTTP_CREATED);
     }
 
     public function getClient(Request $request, Application $app)
@@ -79,7 +79,7 @@ class MainController
         /// SECURITY: Don't send the secret key, it's only needed here
         unset($client->secretKey);
 
-        return json_encode($client, JSON_NUMERIC_CHECK);
+        return $app->json($client, Response::HTTP_OK);
     }
 
     public function indexClient(Request $request, Application $app)
@@ -175,7 +175,7 @@ class MainController
         $client->setFlags($client->getFlags() & ~ClientFlags::INDEX_ELASTICSEARCH);
         $app['repository.client']->save($client);
 
-        return json_encode($responses, JSON_NUMERIC_CHECK);
+        return $app->json($responses, Response::HTTP_OK);
     }
 
     public function getSheakerInfos(Request $request, Application $app)
@@ -188,7 +188,7 @@ class MainController
         $infos = [];
         $infos['reservedSubdomains'] = $reserved_subdomains;
 
-        return json_encode($infos, JSON_NUMERIC_CHECK);
+        return $app->json($infos, Response::HTTP_OK);
     }
 
     private function createElasticIndex($app, $clientIndex)

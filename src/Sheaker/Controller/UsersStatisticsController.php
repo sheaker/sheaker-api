@@ -52,7 +52,7 @@ class UsersStatisticsController
 
         $queryResponse = $app['elasticsearch.client']->search($params);
 
-        return json_encode($queryResponse['hits'], JSON_NUMERIC_CHECK);
+        return $app->json($queryResponse['hits'], Response::HTTP_OK);
     }
 
     public function getNewUsersFromDate(Request $request, Application $app)
@@ -101,6 +101,6 @@ class UsersStatisticsController
 
         $queryResponse = $app['elasticsearch.client']->search($params);
 
-        return json_encode($queryResponse['hits'], JSON_NUMERIC_CHECK);
+        return $app->json($queryResponse['hits'], Response::HTTP_OK);
     }
 }

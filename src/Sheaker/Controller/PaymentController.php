@@ -24,7 +24,7 @@ class PaymentController
 
         $queryResponse = $app['elasticsearch.client']->get($params);
 
-        return json_encode($queryResponse['_source']['payments'], JSON_NUMERIC_CHECK);
+        return $app->json($queryResponse['_source']['payments'], Response::HTTP_OK);
     }
 
     public function getPayment(Request $request, Application $app, $payment_id)
@@ -40,7 +40,7 @@ class PaymentController
             $app->abort(Response::HTTP_NOT_FOUND, 'Payment not found');
         }
 
-        return json_encode($payment, JSON_NUMERIC_CHECK);
+        return $app->json($payment, Response::HTTP_OK);
     }
 
     public function addPayment(Request $request, Application $app, $user_id)
@@ -122,6 +122,6 @@ class PaymentController
         ];
         $app['elasticsearch.client']->update($params);
 
-        return json_encode($payment, JSON_NUMERIC_CHECK);
+        return $app->json($payment, Response::HTTP_CREATED);
     }
 }

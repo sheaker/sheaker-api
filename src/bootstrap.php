@@ -32,6 +32,7 @@ if ($app['debug']) {
 
 date_default_timezone_set($app['timezone']);
 
+$app['errors'] = [];
 $app['api.accessLevels'] = [
     0 => 'client',
     1 => 'user',
@@ -112,7 +113,21 @@ $app['repository.checkin'] = $app->share(function ($app) {
 });
 
 /**
- * Register before handler
+ * Register error midleware
+ */
+$app->error(function (\Exception $e, $code) use ($app) {
+    $errors = $app['errors'];
+
+    array_push($errors, [
+        'status' => $code,
+        'title'  => $e->getMessage()
+    ]);
+
+    $app['errors'] = $errors;
+});
+
+/**
+ * Register before midlewares
  */
 $app->before(function (Request $request, Application $app) {
     if ($request->getMethod() === 'OPTIONS') {
@@ -134,24 +149,16 @@ $checkToken = function (Request $request, Application $app) {
 };
 
 /**
- * Register after handler
+ * Register after midlewares
  */
-$app->after(function (Request $request, Response $response) {
+$app->after(function (Request $request, Response $response) use ($app) {
     $response->headers->set('Content-Type', 'application/json');
-});
-
-/**
- * Register error handler
- */
-$app->error(function (\Exception $e, $code) use ($app) {
-    if ($app['debug']) {
-        return;
+    
+    if (count($app['errors'])) {
+        $response->setContent('{"errors": ' . json_encode($app['errors']) . '}');
+    } else {
+        $response->setContent('{"data": ' . $response->getContent() . '}');
     }
-
-    $app['monolog']->addError($e->getMessage());
-    $app['monolog']->addError($e->getTraceAsString());
-
-    return new JsonResponse(['error' => ['code' => $code, 'message' => $e->getMessage()]]);
 });
 
 // Black magic to handle OPTIONS with the API
