@@ -10,7 +10,8 @@
     "monolog/monolog": "1.x",
     "firebase/php-jwt": "~3.0",
     "elasticsearch/elasticsearch": "~2.0",
-    "aws/aws-sdk-php-silex": "~2.0"
+    "aws/aws-sdk-php-silex": "~2.0",
+    "jdesrosiers/silex-cors-provider": "~0.1"
   },
   "autoload": {
     "psr-0": {"Sheaker": "src/"}

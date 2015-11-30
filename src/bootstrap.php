@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Elasticsearch\ClientBuilder;
 use Aws\Silex\AwsServiceProvider;
+use JDesrosiers\Silex\Provider\CorsServiceProvider;
 
 define('APPLICATION_ENV', getenv('APPLICATION_ENV') ?: 'production');
 
@@ -64,6 +65,12 @@ $app->register(new DoctrineServiceProvider(), [
         ]
     ]
 ]);
+
+$app->register(new CorsServiceProvider, [
+    'cors.allowOrigin'  => '*',
+    'cors.allowMethods' => 'GET, POST, PUT, DELETE, OPTIONS'
+]);
+$app->after($app['cors']);
 
 $app->register(new MonologServiceProvider(), [
     'monolog.logfile' => __DIR__ . '/../logs/application.log',
@@ -152,17 +159,15 @@ $checkToken = function (Request $request, Application $app) {
  * Register after midlewares
  */
 $app->after(function (Request $request, Response $response) use ($app) {
+    // The response will always be in json
     $response->headers->set('Content-Type', 'application/json');
-    
+
     if (count($app['errors'])) {
         $response->setContent('{"errors": ' . json_encode($app['errors']) . '}');
     } else {
         $response->setContent('{"data": ' . $response->getContent() . '}');
     }
 });
-
-// Black magic to handle OPTIONS with the API
-$app->match('{url}', function($url) use ($app) { return 'OK'; })->assert('url', '.*')->method('OPTIONS');
 
 require_once __DIR__ . '/routing.php';
 require_once __DIR__ . '/constants.php';
