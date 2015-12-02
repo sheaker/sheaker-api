@@ -73,6 +73,6 @@ class PaymentsStatisticsController
 
         $queryResponse = $app['elasticsearch.client']->search($params);
 
-        return json_encode($queryResponse['aggregations']['payments']['from_date']['gains'], JSON_NUMERIC_CHECK);
+        return $app->json($queryResponse['aggregations']['payments']['from_date']['gains'], Response::HTTP_OK);
     }
 }

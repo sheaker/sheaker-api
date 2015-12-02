@@ -78,7 +78,7 @@ class UsersGraphicsController
         }
         array_push($response['data'], $data);
 
-        return json_encode($response, JSON_NUMERIC_CHECK);
+        return $app->json($response, Response::HTTP_OK);
     }
 
     public function getGenderRepartition(Request $request, Application $app)
@@ -151,6 +151,6 @@ class UsersGraphicsController
             ]
         ];
 
-        return json_encode($response, JSON_NUMERIC_CHECK);
+        return $app->json($response, Response::HTTP_OK);
     }
 }

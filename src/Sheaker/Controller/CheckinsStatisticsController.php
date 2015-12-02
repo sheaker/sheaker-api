@@ -59,6 +59,6 @@ class CheckinsStatisticsController
 
         $queryResponse = $app['elasticsearch.client']->search($params);
 
-        return json_encode($queryResponse['hits'], JSON_NUMERIC_CHECK);
+        return $app->json($queryResponse['hits'], Response::HTTP_OK);
     }
 }

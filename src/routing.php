@@ -16,9 +16,6 @@ $app->get('/infos',                   'Sheaker\Controller\MainController::getShe
  */
 $app->post('/users/login',            'Sheaker\Controller\UserController::login')
     ->before($fetchClient);
-$app->post('/users/renew_token',      'Sheaker\Controller\UserController::renewToken')
-    ->before($fetchClient)
-    ->before($checkToken);
 
 $app->get('/users',                   'Sheaker\Controller\UserController::getUsersList')
     ->before($fetchClient)

@@ -24,7 +24,7 @@ class CheckinController
 
         $queryResponse = $app['elasticsearch.client']->get($params);
 
-        return json_encode($queryResponse['_source']['checkins'], JSON_NUMERIC_CHECK);
+        return $app->json($queryResponse['_source']['checkins'], Response::HTTP_OK);
     }
 
     public function addCheckin(Request $request, Application $app, $user_id)
@@ -79,6 +79,6 @@ class CheckinController
         ];
         $app['elasticsearch.client']->update($params);
 
-        return json_encode($checkin, JSON_NUMERIC_CHECK);
+        return $app->json($checkin, Response::HTTP_CREATED);
     }
 }

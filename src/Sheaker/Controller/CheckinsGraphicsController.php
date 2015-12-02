@@ -89,6 +89,6 @@ class CheckinsGraphicsController
         }
         array_push($response['data'], $data);
 
-        return json_encode($response, JSON_NUMERIC_CHECK);
+        return $app->json($response, Response::HTTP_OK);
     }
 }
