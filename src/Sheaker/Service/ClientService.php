@@ -35,7 +35,7 @@ class ClientService
         else if ($request->get('id_client'))
             $getParams['id_client'] = $this->app->escape($request->get('id_client'));
         else
-            throw new AppException(Response::HTTP_UNAUTHORIZED, 'No client specified', 5007);
+            throw new AppException(Response::HTTP_BAD_REQUEST, 'Missing parameters', 5007);
 
         if (!empty($getParams['id_client'])) {
             $client = $this->app['repository.client']->find($getParams['id_client']);
@@ -50,9 +50,6 @@ class ClientService
             }
 
             unset($client->secretKey);
-        }
-        else {
-            throw new AppException(Response::HTTP_BAD_REQUEST, 'Missing parameters', 5010);
         }
 
         $this->client = $client;
