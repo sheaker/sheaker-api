@@ -21,9 +21,11 @@ class MainController
 
         foreach ($getParams as $value) {
             if (!isset($value)) {
-                $app->abort(Response::HTTP_BAD_REQUEST, 'Missing parameters');
+                throw new AppException(Response::HTTP_BAD_REQUEST, 'Missing parameters', 5000);
             }
         }
+
+        //@Todo: check if the subdomain doesn't exists
 
         // create our new client
         $client = new Client();
@@ -49,6 +51,10 @@ class MainController
         // Add user rights
         $app['dbs']['sheaker']->query("INSERT INTO users_access VALUES (LAST_INSERT_ID(), 3);");
 
+        if ($app['elasticsearch.client']->indices()->exists(['index' => $clientAppName])) {
+            throw new AppException(Response::HTTP_CONFLICT, 'Already exists', 5002);
+        }
+
         // create indice ES
         self::createElasticIndex($app, $clientAppName);
 
@@ -56,9 +62,11 @@ class MainController
         $s3 = $app['aws']->createS3();
 
         $bucketName = 'sheaker-' . md5($clientAppName);
-        if (!$s3->doesBucketExist($bucketName)) {
-            $s3->createBucket(['Bucket' => $bucketName]);
+        if ($s3->doesBucketExist($bucketName)) {
+            throw new AppException(Response::HTTP_CONFLICT, 'Already exists', 5003);
         }
+
+        $s3->createBucket(['Bucket' => $bucketName]);
 
         return $app->json($client, Response::HTTP_CREATED);
     }
@@ -70,7 +78,7 @@ class MainController
 
         foreach ($getParams as $value) {
             if (!isset($value)) {
-                $app->abort(Response::HTTP_BAD_REQUEST, 'Missing parameters');
+                throw new AppException(Response::HTTP_BAD_REQUEST, 'Missing parameters', 5004);
             }
         }
 
@@ -84,16 +92,12 @@ class MainController
 
     public function indexClient(Request $request, Application $app)
     {
-        $token = $app['jwt']->getDecodedToken();
-
-        if (!$app['debug'] && !in_array('admin', $token->user->permissions)) {
-            $app->abort(Response::HTTP_FORBIDDEN, 'Forbidden');
-        }
-
         $client = $app['client']->getClient();
         if (!$app['debug'] && !($client->getFlags() & ClientFlags::INDEX_ELASTICSEARCH)) {
-            $app->abort(Response::HTTP_FORBIDDEN, 'Forbidden');
+            throw new AppException(Response::HTTP_FORBIDDEN, 'Forbidden', 5005);
         }
+
+        // @todo: check if the indexation process is already in progress, by adding a flag INDEX_ELASTICSEARCH_IN_PROGRESS ?
 
         $params['index'] = 'client_' . $app['client.id'];
 
@@ -194,10 +198,6 @@ class MainController
     private function createElasticIndex($app, $clientIndex)
     {
         $params['index'] = $clientIndex;
-
-        if ($app['elasticsearch.client']->indices()->exists(['index' => $params['index']])) {
-            $app->abort(Response::HTTP_CONFLICT, 'Already exists');
-        }
 
         $params['body']['mappings']['user'] = [
             '_source' => [
