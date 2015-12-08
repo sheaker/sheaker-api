@@ -14,7 +14,7 @@ class CheckinController
         $token = $app['jwt']->getDecodedToken();
 
         if (!in_array('admin', $token->user->permissions) && !in_array('modo', $token->user->permissions) && !in_array('user', $token->user->permissions)){
-            $app->abort(Response::HTTP_FORBIDDEN, 'Forbidden');
+            throw new AppException(Response::HTTP_FORBIDDEN, 'Forbidden', 3000);
         }
 
         $params = [];
@@ -32,7 +32,7 @@ class CheckinController
         $token = $app['jwt']->getDecodedToken();
 
         if (!in_array('admin', $token->user->permissions) && !in_array('modo', $token->user->permissions) && !in_array('user', $token->user->permissions)) {
-            $app->abort(Response::HTTP_FORBIDDEN, 'Forbidden');
+            throw new AppException(Response::HTTP_FORBIDDEN, 'Forbidden', 3001);
         }
 
         $checkin = new Checkin();
