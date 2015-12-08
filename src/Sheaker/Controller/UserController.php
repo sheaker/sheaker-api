@@ -26,7 +26,7 @@ class UserController
 
         $user = $app['repository.user']->find($loginParams['id']);
         if (!$user) {
-            throw new AppException(Response::HTTP_NOT_FOUND, 'User not found', 1001);
+            throw new AppException(Response::HTTP_UNAUTHORIZED, 'Id or password invalid', 1001);
         }
 
         if (password_verify($loginParams['password'], $user->getPassword())) {
@@ -51,7 +51,7 @@ class UserController
         else {
             $user->setFailedLogins($user->getFailedLogins() + 1);
             $app['repository.user']->save($user);
-            throw new AppException(Response::HTTP_FORBIDDEN, 'Wrong password', 1003);
+            throw new AppException(Response::HTTP_UNAUTHORIZED, 'Id or password invalid', 1002);
         }
 
         return $app->json(['token' => $token], Response::HTTP_OK);
@@ -62,7 +62,7 @@ class UserController
         $token = $app['jwt']->getDecodedToken();
 
         if (!in_array('admin', $token->user->permissions) && !in_array('modo', $token->user->permissions) && !in_array('user', $token->user->permissions)) {
-            throw new AppException(Response::HTTP_FORBIDDEN, 'Forbidden', 1004);
+            throw new AppException(Response::HTTP_FORBIDDEN, 'Forbidden', 1003);
         }
 
         $getParams = [];
@@ -120,7 +120,7 @@ class UserController
         $token = $app['jwt']->getDecodedToken();
 
         if (!in_array('admin', $token->user->permissions) && !in_array('modo', $token->user->permissions) && !in_array('user', $token->user->permissions)) {
-            throw new AppException(Response::HTTP_FORBIDDEN, 'Forbidden', 1005);
+            throw new AppException(Response::HTTP_FORBIDDEN, 'Forbidden', 1004);
         }
 
         $getParams = [];
@@ -168,7 +168,7 @@ class UserController
         $token = $app['jwt']->getDecodedToken();
 
         if (!in_array('admin', $token->user->permissions) && !in_array('modo', $token->user->permissions) && !in_array('user', $token->user->permissions)) {
-            throw new AppException(Response::HTTP_FORBIDDEN, 'Forbidden', 1006);
+            throw new AppException(Response::HTTP_FORBIDDEN, 'Forbidden', 1005);
         }
 
         $params = [];
@@ -190,7 +190,7 @@ class UserController
         $queryResponse = $app['elasticsearch.client']->search($params);
 
         if ($queryResponse['hits']['total'] === 0) {
-            throw new AppException(Response::HTTP_NOT_FOUND, 'User not found', 1007);
+            throw new AppException(Response::HTTP_NOT_FOUND, 'User not found', 1006);
         }
 
         // There should have only 1 user, no need to iterate
@@ -216,7 +216,7 @@ class UserController
         $token = $app['jwt']->getDecodedToken();
 
         if (!in_array('admin', $token->user->permissions) && !in_array('modo', $token->user->permissions)) {
-            throw new AppException(Response::HTTP_FORBIDDEN, 'Forbidden', 1008);
+            throw new AppException(Response::HTTP_FORBIDDEN, 'Forbidden', 1007);
         }
 
         $addParams = [];
@@ -225,7 +225,7 @@ class UserController
 
         foreach ($addParams as $value) {
             if (!isset($value)) {
-                throw new AppException(Response::HTTP_BAD_REQUEST, 'Missing parameters', 1009);
+                throw new AppException(Response::HTTP_BAD_REQUEST, 'Missing parameters', 1008);
             }
         }
 
@@ -328,7 +328,7 @@ class UserController
         $token = $app['jwt']->getDecodedToken();
 
         if (!in_array('admin', $token->user->permissions) && !in_array('modo', $token->user->permissions)) {
-            throw new AppException(Response::HTTP_FORBIDDEN, 'Forbidden', 1010);
+            throw new AppException(Response::HTTP_FORBIDDEN, 'Forbidden', 1009);
         }
 
         $editParams = [];
@@ -337,7 +337,7 @@ class UserController
 
         foreach ($editParams as $value) {
             if (!isset($value)) {
-                throw new AppException(Response::HTTP_BAD_REQUEST, 'Missing parameters', 1011);
+                throw new AppException(Response::HTTP_BAD_REQUEST, 'Missing parameters', 1010);
             }
         }
 
@@ -356,7 +356,7 @@ class UserController
 
         $user = $app['repository.user']->find($user_id);
         if (!$user) {
-            throw new AppException(Response::HTTP_NOT_FOUND, 'User not found', 1012);
+            throw new AppException(Response::HTTP_NOT_FOUND, 'User not found', 1011);
         }
 
         $photoURL = '';
@@ -441,12 +441,12 @@ class UserController
         $token = $app['jwt']->getDecodedToken();
 
         if (!in_array('admin', $token->user->permissions)) {
-            throw new AppException(Response::HTTP_FORBIDDEN, 'Forbidden', 1013);
+            throw new AppException(Response::HTTP_FORBIDDEN, 'Forbidden', 1012);
         }
 
         $user = $app['repository.user']->find($user_id);
         if (!$user) {
-            throw new AppException(Response::HTTP_NOT_FOUND, 'User not found', 1014);
+            throw new AppException(Response::HTTP_NOT_FOUND, 'User not found', 1013);
         }
 
         $user->setDeletedAt(date('Y-m-d H:i:s'));
