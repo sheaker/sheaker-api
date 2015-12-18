@@ -3,6 +3,7 @@
 /**
  * Main routes
  */
+$app->get('/',                        'Sheaker\Controller\MainController::getRoot');
 $app->get('/clients',                 'Sheaker\Controller\MainController::getClient')
     ->before($fetchClient);
 $app->post('/clients',                'Sheaker\Controller\MainController::createClient');

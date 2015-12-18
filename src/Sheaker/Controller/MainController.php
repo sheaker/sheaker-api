@@ -11,6 +11,11 @@ use Sheaker\Entity\Client;
 
 class MainController
 {
+    public function getRoot(Request $request, Application $app)
+    {
+        return $app->json(null, Response::HTTP_OK);
+    }
+
     public function createClient(Request $request, Application $app)
     {
         $getParams = [];
