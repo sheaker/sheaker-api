@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Elasticsearch\ClientBuilder;
 use Aws\Silex\AwsServiceProvider;
 use JDesrosiers\Silex\Provider\CorsServiceProvider;
+use Sheaker\Exception\AppException;
 
 define('APPLICATION_ENV', getenv('APPLICATION_ENV') ?: 'production');
 
@@ -122,7 +123,26 @@ $app['repository.checkin'] = $app->share(function ($app) {
 /**
  * Register error midleware
  */
-$app->error(function (\Exception $e, $code) use ($app) {
+$app->error(function (AppException $e, $code) use ($app) {
+    $errors = $app['errors'];
+
+    array_push($errors, [
+        'status' => $code,
+        'code'   => $e->getCode(),
+        'title'  => $e->getMessage()
+    ]);
+
+    $app['errors'] = $errors;
+});
+
+$app->error(function ($e, $code) use ($app) {
+    if ($e instanceof AppException) {
+        return;
+    }
+
+    $app['monolog']->addError($e->getMessage());
+    $app['monolog']->addError($e->getTraceAsString());
+
     $errors = $app['errors'];
 
     array_push($errors, [

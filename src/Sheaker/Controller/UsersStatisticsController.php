@@ -13,7 +13,7 @@ class UsersStatisticsController
         $token = $app['jwt']->getDecodedToken();
 
         if (!in_array('admin', $token->user->permissions) && !in_array('modo', $token->user->permissions) && !in_array('user', $token->user->permissions)) {
-            $app->abort(Response::HTTP_FORBIDDEN, 'Forbidden');
+            throw new AppException(Response::HTTP_FORBIDDEN, 'Forbidden', 4004);
         }
 
         $getParams = [];
@@ -60,7 +60,7 @@ class UsersStatisticsController
         $token = $app['jwt']->getDecodedToken();
 
         if (!in_array('admin', $token->user->permissions) && !in_array('modo', $token->user->permissions) && !in_array('user', $token->user->permissions)) {
-            $app->abort(Response::HTTP_FORBIDDEN, 'Forbidden');
+            throw new AppException(Response::HTTP_FORBIDDEN, 'Forbidden', 4005);
         }
 
         $getParams = [];
@@ -68,7 +68,7 @@ class UsersStatisticsController
 
         foreach ($getParams as $value) {
             if (!isset($value)) {
-                $app->abort(Response::HTTP_BAD_REQUEST, 'Missing parameters');
+                throw new AppException(Response::HTTP_BAD_REQUEST, 'Missing parameters', 4006);
             }
         }
 

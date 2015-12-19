@@ -14,7 +14,7 @@ class PaymentController
         $token = $app['jwt']->getDecodedToken();
 
         if (!in_array('admin', $token->user->permissions) && !in_array('modo', $token->user->permissions) && !in_array('user', $token->user->permissions)) {
-            $app->abort(Response::HTTP_FORBIDDEN, 'Forbidden');
+            throw new AppException(Response::HTTP_FORBIDDEN, 'Forbidden', 2000);
         }
 
         $params = [];
@@ -32,12 +32,12 @@ class PaymentController
         $token = $app['jwt']->getDecodedToken();
 
         if (!in_array('admin', $token->user->permissions) && !in_array('modo', $token->user->permissions) && !in_array('user', $token->user->permissions)) {
-            $app->abort(Response::HTTP_FORBIDDEN, 'Forbidden');
+            throw new AppException(Response::HTTP_FORBIDDEN, 'Forbidden', 2001);
         }
 
         $payment = $app['repository.payment']->find($payment_id);
         if (!$payment) {
-            $app->abort(Response::HTTP_NOT_FOUND, 'Payment not found');
+            throw new AppException(Response::HTTP_NOT_FOUND, 'Payment not found', 2002);
         }
 
         return $app->json($payment, Response::HTTP_OK);
@@ -48,7 +48,7 @@ class PaymentController
         $token = $app['jwt']->getDecodedToken();
 
         if (!in_array('admin', $token->user->permissions) && !in_array('modo', $token->user->permissions)) {
-            $app->abort(Response::HTTP_FORBIDDEN, 'Forbidden');
+            throw new AppException(Response::HTTP_FORBIDDEN, 'Forbidden', 2003);
         }
 
         $addParams = [];
@@ -60,7 +60,7 @@ class PaymentController
 
         foreach ($addParams as $value) {
             if (!isset($value)) {
-                $app->abort(Response::HTTP_BAD_REQUEST, 'Missing parameters');
+                throw new AppException(Response::HTTP_BAD_REQUEST, 'Missing parameters', 2004);
             }
         }
 

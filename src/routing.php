@@ -3,12 +3,12 @@
 /**
  * Main routes
  */
+$app->get('/',                        'Sheaker\Controller\MainController::getRoot');
 $app->get('/clients',                 'Sheaker\Controller\MainController::getClient')
     ->before($fetchClient);
 $app->post('/clients',                'Sheaker\Controller\MainController::createClient');
 $app->put('/clients/index',           'Sheaker\Controller\MainController::indexClient')
-    ->before($fetchClient)
-    ->before($checkToken);
+    ->before($fetchClient);
 $app->get('/infos',                   'Sheaker\Controller\MainController::getSheakerInfos');
 
 /**
