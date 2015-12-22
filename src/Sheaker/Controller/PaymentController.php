@@ -75,6 +75,7 @@ class PaymentController
         $payment->setPrice($addParams['price']);
         $payment->setMethod($addParams['method']);
         $payment->setCreatedAt(date('Y-m-d H:i:s'));
+        $payment->setDeletedAt(null);
         $app['repository.payment']->save($payment);
 
         $params = [];
@@ -123,5 +124,36 @@ class PaymentController
         $app['elasticsearch.client']->update($params);
 
         return $app->json($payment, Response::HTTP_CREATED);
+    }
+
+    public function deletePayment(Request $request, Application $app, $payment_id)
+    {
+        $token = $app['jwt']->getDecodedToken();
+
+        if (!in_array('admin', $token->user->permissions)) {
+            throw new AppException(Response::HTTP_FORBIDDEN, 'Forbidden', 2005);
+        }
+
+        $payment = $app['repository.payment']->find($payment_id);
+        if (!$user) {
+            throw new AppException(Response::HTTP_NOT_FOUND, 'Payment not found', 2006);
+        }
+
+        $payment->setDeletedAt(date('Y-m-d H:i:s'));
+        $app['repository.payment']->save($payment);
+
+        $params = [];
+        $params['index'] = 'client_' . $app['client.id'];
+        $params['type']  = 'user';
+        $params['id']    = $user_id;
+        $params['body']  = [
+            'doc' => [
+                'deleted_at' => date('c', strtotime($user->getDeletedAt()))
+            ]
+        ];
+
+        $app['elasticsearch.client']->update($params);
+
+        return $app->json(null, Response::HTTP_NO_CONTENT);
     }
 }

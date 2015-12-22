@@ -35,6 +35,7 @@ class PaymentRepository implements RepositoryInterface
             'comment'    => $payment->getComment(),
             'price'      => $payment->getPrice(),
             'method'     => $payment->getMethod(),
+            'deleted_at' => $payment->getDeletedAt()
         );
 
         $this->db->insert('users_payments', $paymentData);
@@ -141,6 +142,7 @@ class PaymentRepository implements RepositoryInterface
         $payment->setPrice($paymentData['price']);
         $payment->setMethod($paymentData['method']);
         $payment->setCreatedAt(date('c', strtotime($paymentData['created_at'])));
+        $payment->setDeletedAt(($paymentData['deleted_at']) ? date('c', strtotime($paymentData['deleted_at'])) : null);
 
         return $payment;
     }

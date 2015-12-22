@@ -61,11 +61,18 @@ class Payment
     public $method;
 
     /**
-     * When the user entity was created.
+     * When the payment entity was created.
      *
      * @var string
      */
     public $created_at;
+
+    /**
+     * When the payent entity was deleted.
+     *
+     * @var string
+     */
+    public $deleted_at;
 
     public function getId()
     {
@@ -146,5 +153,14 @@ class Payment
     public function setCreatedAt($createdAt)
     {
         $this->created_at = $createdAt;
+    }
+
+    public function getDeletedAt()
+    {
+        return $this->deleted_at;
+    }
+    public function setDeletedAt($deletedAt)
+    {
+        $this->deleted_at = $deletedAt;
     }
 }
