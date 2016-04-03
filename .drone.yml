@@ -39,4 +39,4 @@ notify:
     channel: notifications
     username: Drone
     template: >
-      Build <{{ sys.link_url }}/{{ repo.full_name }}/{{ build.number }}|{{ repo.name }}#{{ truncate build.commit 7 }}> ({{ build.branch }}) by {{ build.author }} finished with a *{{ build.status }}* status in {{ duration build.started_at build.finished_at }}
+      Build <https://drone.sheaker.com/{{ repo.full_name }}/{{ build.number }}|{{ repo.name }}#{{ truncate build.commit 7 }}> ({{ build.branch }}) by {{ build.author }} finished with a *{{ build.status }}* status in {{ duration build.started_at build.finished_at }}
