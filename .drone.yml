@@ -13,7 +13,7 @@ deploy:
   sftp:
     host: sheaker.com
     username: ubuntu
-    destination_path: /tmp/sheaker
+    destination_path: /tmp/sheaker-back
     files:
       - .deploy
       - config
@@ -29,7 +29,7 @@ deploy:
     host: sheaker.com
     user: ubuntu
     commands:
-      - /tmp/sheaker/.deploy/remote.sh
+      - /tmp/sheaker-back/.deploy/remote.sh
     when:
       branch: master
 
