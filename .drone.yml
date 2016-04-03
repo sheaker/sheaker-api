@@ -8,7 +8,6 @@ build:
   pull: true
   commands:
     - composer install --no-interaction --no-dev --no-progress --optimize-autoloader
-    - env
 
 deploy:
   sftp:
@@ -40,4 +39,4 @@ notify:
     channel: notifications
     username: Drone
     template: >
-      Build <https://drone.sheaker.com/Hexagone/sheaker/{{ build.number }}|{{ repo.name }}#{{ truncate build.commit 7 }}> ({{ build.branch }}) by {{ build.author }} finished with a *{{ build.status }}* status in {{ duration build.started_at build.finished_at }}
+      Build <{{ build.link_url }}|{{ repo.name }}#{{ truncate build.commit 7 }}> ({{ build.branch }}) by {{ build.author }} finished with a *{{ build.status }}* status in {{ duration build.started_at build.finished_at }}
